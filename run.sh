@@ -29,4 +29,4 @@ done
 ./build.sh ${SET_TARGET} ${SET_BUILD_DIR} || exit 1
 
 # Run
-${RUN_TARGET} || exit 1
+sudo ${RUN_TARGET} || exit 1
