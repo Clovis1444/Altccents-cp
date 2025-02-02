@@ -1,84 +1,106 @@
-#include <fcntl.h>
-#include <libevdev-1.0/libevdev/libevdev.h>
-#include <linux/input-event-codes.h>
-#include <sys/select.h>
-#include <unistd.h>
+#include <X11/Xlib.h>
+#include <X11/extensions/XTest.h>
 
-#include <cerrno>
-#include <cstring>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
-int main() {
-    libevdev* dev = nullptr;
-    int fd{};
-    int rc{};
+// Returns 0 if failed to find unused keycode
+KeyCode findUnusedKeycode(Display* display) {
+    char keys[32];
+    XQueryKeymap(display, keys);
 
-    fd = open("/dev/input/event2", O_RDWR | O_NONBLOCK);
+    int min_keycode{};
+    int max_keycode{};
+    XDisplayKeycodes(display, &min_keycode, &max_keycode);
 
-    rc = libevdev_new_from_fd(fd, &dev);
-
-    // File open handling
-    if (fd < 0) {
-        std::cout << "Failed to open device: " << strerror(errno) << '\n';
-        return errno;
-    }
-
-    // Libevdev creation handling
-    if (rc < 0) {
-        close(fd);
-        std::cout << "Failed to init libevdev: " << strerror(-rc) << '\n';
-        return -rc;
-    }
-
-    std::cout << "Device name is \"" << libevdev_get_name(dev) << "\"\n";
-
-    while (true) {
-        input_event ev;
-        rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
-
-        if (rc == 0 && ev.type == EV_KEY) {
-            if (ev.code == KEY_A) {
-                libevdev_grab(dev, LIBEVDEV_GRAB);
-                continue;
-            }
-            if (ev.code == KEY_S) {
-                libevdev_grab(dev, LIBEVDEV_UNGRAB);
-                continue;
-            }
-            if (ev.code == KEY_Q) {
-                libevdev_grab(dev, LIBEVDEV_UNGRAB);
-                break;
-            }
-            // Emulate keyboard input
-            if (ev.code == KEY_P && ev.value == 1) {
-                input_event virtual_ev{};
-
-                gettimeofday(&virtual_ev.time, nullptr);
-                virtual_ev.type = EV_KEY;
-                virtual_ev.code = KEY_2;
-                virtual_ev.value = 1444;  // 1 key press; 0 - key release
-
-                // Key press
-                write(fd, &virtual_ev, sizeof(virtual_ev));
-                // Key release
-                virtual_ev.value = 0;
-                write(fd, &virtual_ev, sizeof(virtual_ev));
-                // Syncronize events
-                virtual_ev.type = EV_SYN;
-                virtual_ev.code = SYN_REPORT;
-                virtual_ev.value = 0;
-                write(fd, &virtual_ev, sizeof(virtual_ev));
-            }
-
-            std::cout << libevdev_event_code_get_name(EV_KEY, ev.code)
-                      << (ev.value ? ((ev.value > 1) ? " REpeated" : "pressed")
-                                   : " released")
-                      << std::endl;
+    for (int keycode{min_keycode}; keycode <= max_keycode; ++keycode) {
+        int byte_index{keycode / 8};
+        int bit_index{keycode % 8};
+        if (!(keys[byte_index] & (1 << (bit_index)))) {
+            return static_cast<KeyCode>(keycode);  // This keycode is unused
         }
     }
 
-    libevdev_grab(dev, LIBEVDEV_UNGRAB);
-    libevdev_free(dev);
-    close(fd);
+    return 0;
+}
+
+// Returns old KeySym of the passed keycode
+KeySym mapKey(Display* display, KeyCode keycode, KeySym new_keysym) {
+    // TODO(clovis): refactor this using XKB
+    KeySym old_keysym{XKeycodeToKeysym(display, keycode, 0)};
+
+    XChangeKeyboardMapping(display, keycode, 1, &new_keysym, 1);
+    XFlush(display);
+
+    return old_keysym;
+}
+
+// void printKeycodes() {
+//     Display* display = XOpenDisplay(nullptr);
+//
+//     char keys[32];
+//     XQueryKeymap(display, keys);
+//
+//     int min_keycode{};
+//     int max_keycode{};
+//     XDisplayKeycodes(display, &min_keycode, &max_keycode);
+//
+//     std::cout << "Min: " << min_keycode << "\nMax: " << max_keycode
+//               << std::endl;
+//
+//     int pressed_count{};
+//     for (int keycode{min_keycode}; keycode <= max_keycode; ++keycode) {
+//         int byte{keycode / 8};
+//         int bit{keycode % 8};
+//         bool key_value{static_cast<bool>(keys[byte] & (1 << bit))};
+//
+//         if (key_value) {
+//             char* key{XKeysymToString(XKeycodeToKeysym(display, keycode,
+//             0))}; std::cout << key << '[' << keycode << "] : " << key_value
+//                       << std::endl;
+//             ++pressed_count;
+//         }
+//     }
+//
+//     std::cout << "Total keys pressed: " << pressed_count << std::endl;
+//
+//     XCloseDisplay(display);
+// }
+
+int main() {
+    Display* display = XOpenDisplay(nullptr);
+    if (!display) {
+        std::cerr << "Unable to open X display" << std::endl;
+        return 1;
+    }
+
+    // Find an unused keycode
+    KeyCode temp_keycode = findUnusedKeycode(display);
+    if (temp_keycode == 0) {
+        std::cerr << "No unused keycode found" << std::endl;
+        XCloseDisplay(display);
+        return 1;
+    }
+
+    // Desired keysym(unicode character)
+    KeySym new_keysym{XStringToKeysym("U0414")};
+    // Map to desired keysym
+    KeySym old_keysym{mapKey(display, temp_keycode, new_keysym)};
+
+    // Emulate key presses
+    for (int i = 0; i < 5; ++i) {
+        XTestFakeKeyEvent(display, temp_keycode, True, CurrentTime);
+        XTestFakeKeyEvent(display, temp_keycode, False, CurrentTime);
+        XFlush(display);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    // Map back to default keysym
+    mapKey(display, temp_keycode, old_keysym);
+
+    XCloseDisplay(display);
+
     return 0;
 }
