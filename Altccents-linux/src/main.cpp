@@ -1,9 +1,12 @@
+#include <X11/XKBlib.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 
 #include <chrono>
 #include <iostream>
 #include <thread>
+
+#include "Utils.h"
 
 // Returns 0 if failed to find unused keycode
 KeyCode findUnusedKeycode(Display* display) {
@@ -69,37 +72,51 @@ KeySym mapKey(Display* display, KeyCode keycode, KeySym new_keysym) {
 // }
 
 int main() {
+    // Display* display = XOpenDisplay(nullptr);
+    // if (!display) {
+    //     std::cerr << "Unable to open X display" << std::endl;
+    //     return 1;
+    // }
+    //
+    // // Find an unused keycode
+    // KeyCode temp_keycode = findUnusedKeycode(display);
+    // if (temp_keycode == 0) {
+    //     std::cerr << "No unused keycode found" << std::endl;
+    //     XCloseDisplay(display);
+    //     return 1;
+    // }
+    //
+    // // Desired keysym(unicode character)
+    // KeySym new_keysym{XStringToKeysym("U0414")};
+    // // Map to desired keysym
+    // KeySym old_keysym{mapKey(display, temp_keycode, new_keysym)};
+    //
+    // // Emulate key presses
+    // for (int i = 0; i < 5; ++i) {
+    //     XTestFakeKeyEvent(display, temp_keycode, True, CurrentTime);
+    //     XTestFakeKeyEvent(display, temp_keycode, False, CurrentTime);
+    //     XFlush(display);
+    //
+    //     std::this_thread::sleep_for(std::chrono::seconds(1));
+    // }
+    //
+    // // Map back to default keysym
+    // mapKey(display, temp_keycode, old_keysym);
+    //
+    // XCloseDisplay(display);
+    //
+    // return 0;
+
+    // Open a connection to the X server
     Display* display = XOpenDisplay(nullptr);
     if (!display) {
         std::cerr << "Unable to open X display" << std::endl;
         return 1;
     }
 
-    // Find an unused keycode
-    KeyCode temp_keycode = findUnusedKeycode(display);
-    if (temp_keycode == 0) {
-        std::cerr << "No unused keycode found" << std::endl;
-        XCloseDisplay(display);
-        return 1;
-    }
+    Altccents::Utils::printKeyMapping(nullptr, 7);
 
-    // Desired keysym(unicode character)
-    KeySym new_keysym{XStringToKeysym("U0414")};
-    // Map to desired keysym
-    KeySym old_keysym{mapKey(display, temp_keycode, new_keysym)};
-
-    // Emulate key presses
-    for (int i = 0; i < 5; ++i) {
-        XTestFakeKeyEvent(display, temp_keycode, True, CurrentTime);
-        XTestFakeKeyEvent(display, temp_keycode, False, CurrentTime);
-        XFlush(display);
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-
-    // Map back to default keysym
-    mapKey(display, temp_keycode, old_keysym);
-
+    // Close the connection to the X server
     XCloseDisplay(display);
 
     return 0;

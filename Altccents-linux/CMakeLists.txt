@@ -8,6 +8,7 @@ find_package(X11 REQUIRED)
 
 add_executable(Altccents-linux 
 ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/Utils.h
 )
 
 # Note: Use PRIVATE to use lib as private dep
