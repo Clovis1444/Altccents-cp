@@ -6,11 +6,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Weffc++ -Wno-sign-compare -Wconversion -Wsign-conversion -pedantic-errors")
 
 # IMPORTANT: Generate COMPILE_COMMANDS.JSON file
+# This line makes headers visible by LSP
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+
+
+set(CMAKE_PREFIX_PATH $ENV{QT_PATH})
+find_package(Qt6 REQUIRED COMPONENTS Core)
+
+qt_standard_project_setup()
 
 # Application library
 add_subdirectory(Altccents)
-
 
 # Platform specific actions
 if(WIN32)
