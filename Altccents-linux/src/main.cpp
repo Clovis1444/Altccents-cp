@@ -1,7 +1,7 @@
-#include <QDebug>
+#include "Altccents/Altccents.h"
 
 int main() {
-    qInfo() << "Hello from Linux!";
+    Altccents::ReadAccentProfiles("samples");
 
     return 0;
 }
