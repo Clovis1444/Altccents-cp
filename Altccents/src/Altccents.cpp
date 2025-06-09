@@ -13,6 +13,10 @@ namespace {
 void warning(const QString& text) {
     qWarning().noquote() << "Altccents [WARNING]:" << text;
 }
+
+void info(const QString& text) {
+    qInfo().noquote() << "Altccents [INFO]:" << text;
+}
 };  // namespace
 
 // PUBLIC
@@ -41,7 +45,7 @@ void ReadAccentProfiles(const QString& dir_path) {
     QList<AccentProfile> profiles{};
 
     // Deserialize profiles
-    for (const auto& i : jsons) {
+    for (const QFileInfo& i : jsons) {
         QFile f{i.absoluteFilePath()};
 
         // Skip if failed to open file
@@ -56,11 +60,17 @@ void ReadAccentProfiles(const QString& dir_path) {
         QByteArray file_data{f.readAll()};
         f.close();
 
+        info(QString{"Deserializing \"%1\""}.arg(i.absoluteFilePath()));
         AccentProfile profile{AccentProfile::Deserialize(file_data)};
 
         // Check if profile is Valid
         if (profile.isValid()) {
             profiles.push_back(profile);
+            info(QString{"\"%1\" was successfully deserialized"}.arg(
+                i.absoluteFilePath()));
+        } else {
+            warning(QString{"Failed to deserialize \"%1\""}.arg(
+                i.absoluteFilePath()));
         }
     }
 
