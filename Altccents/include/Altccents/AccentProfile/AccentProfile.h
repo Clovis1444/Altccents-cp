@@ -13,6 +13,7 @@ namespace Altccents {
 class AccentProfile {
    public:
     AccentProfile(const QByteArray& data, const QFileInfo& fileInfo);
+    AccentProfile() = default;
 
     static AccentProfile Deserialize(const QByteArray& data,
                                      const QFileInfo& fileInfo);
@@ -21,7 +22,12 @@ class AccentProfile {
         QJsonDocument::JsonFormat format = QJsonDocument::Indented);
 
     QFileInfo fileInfo() const { return fileInfo_; }
+    QHash<Qt::Key, QPair<QList<QChar>, QList<QChar>>> accents() const {
+        return accents_;
+    };
     QString filePath() const { return fileInfo_.absoluteFilePath(); }
+    QString name() const { return fileInfo_.baseName(); }
+
     bool isEmpty() const;
 
     static void printJsonAccentProfileExample();

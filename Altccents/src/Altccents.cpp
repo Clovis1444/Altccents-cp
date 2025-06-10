@@ -21,13 +21,13 @@ void info(const QString& text) {
 
 // PUBLIC
 namespace Altccents {
-void ReadAccentProfiles(const QString& dir_path) {
+QList<AccentProfile> ReadAccentProfiles(const QString& dir_path) {
     QDir dir{dir_path};
     // Check if dir exists
     if (!dir.exists()) {
         QString e{"Directory %1 does not exist"};
         warning(e.arg(dir.absolutePath()));
-        return;
+        return {};
     }
 
     dir.setFilter(QDir::Files);
@@ -39,7 +39,7 @@ void ReadAccentProfiles(const QString& dir_path) {
     if (jsons.isEmpty()) {
         QString e{"No profiles in %1"};
         warning(e.arg(dir.absolutePath()));
-        return;
+        return {};
     }
 
     QList<AccentProfile> profiles{};
@@ -74,7 +74,32 @@ void ReadAccentProfiles(const QString& dir_path) {
         }
     }
 
-    // TODO(Clovis): do something with profiles
-    qInfo() << "Number of valid profiles:" << profiles.count();
+    return profiles;
+}
+
+bool AltccentsApp::loadAccentProfiles(const QString& dir) {
+    QList<AccentProfile> profiles{ReadAccentProfiles(dir)};
+    // Check if find any valid profile
+    if (profiles.isEmpty()) {
+        return false;
+    }
+
+    loadedAccentProfiles_ = profiles;
+
+    // If found loaded profile with the same accents as active - update active
+    // else - set emtpy as active profile
+    bool found_active_profile{};
+    for (const AccentProfile& i : loadedAccentProfiles_) {
+        if (i.accents() == activeAccentProfile_.accents()) {
+            activeAccentProfile_ = i;
+            found_active_profile = true;
+            break;
+        }
+    }
+    if (!found_active_profile) {
+        activeAccentProfile_ = {};
+    }
+
+    return true;
 }
 }  // namespace Altccents
