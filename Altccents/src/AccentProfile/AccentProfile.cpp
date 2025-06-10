@@ -18,8 +18,8 @@ namespace Altccents {
 // PUBLIC
 //
 
-// TODO(Clovis)
-AccentProfile::AccentProfile(const QByteArray& data) {
+AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
+    : fileInfo_{fileInfo} {
     QJsonParseError e{};
     QJsonDocument json{QJsonDocument::fromJson(data, &e)};
 
@@ -70,25 +70,21 @@ AccentProfile::AccentProfile(const QByteArray& data) {
     }
 };
 
-// TODO(Clovis)
-AccentProfile AccentProfile::Deserialize(const QByteArray& data) {
-    return AccentProfile{data};
+AccentProfile AccentProfile::Deserialize(const QByteArray& data,
+                                         const QFileInfo& fileInfo) {
+    return AccentProfile{data, fileInfo};
 };
-// TODO(Clovis)
 QByteArray AccentProfile::Serialize(const AccentProfile& obj,
                                     QJsonDocument::JsonFormat format) {
     return obj.toQJsonDocument().toJson(format);
 };
 
-// TODO(Clovis)
-bool AccentProfile::isValid() const { return !accents_.isEmpty(); };
+bool AccentProfile::isEmpty() const { return !accents_.isEmpty(); };
 
 void AccentProfile::printJsonAccentProfileExample() {
     qInfo().noquote() << kJsonAccentProfileExample.trimmed();
 }
 
-// TODO(clovis): implement this using AccentProfile::Serialize() and as
-// toString()
 void AccentProfile::print(const QJsonDocument::JsonFormat& format) const {
     qInfo().noquote() << toQJsonDocument().toJson(format).trimmed();
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qfileinfo.h>
 #include <qhash.h>
 #include <qhashfunctions.h>
 #include <qjsonarray.h>
@@ -11,17 +12,18 @@
 namespace Altccents {
 class AccentProfile {
    public:
-    explicit AccentProfile(
-        const QHash<Qt::Key, QPair<QList<QChar>, QList<QChar>>>& accents)
-        : accents_{accents} {}
-    explicit AccentProfile(const QByteArray& data);
+    AccentProfile(const QByteArray& data, const QFileInfo& fileInfo);
 
-    static AccentProfile Deserialize(const QByteArray& data);
+    static AccentProfile Deserialize(const QByteArray& data,
+                                     const QFileInfo& fileInfo);
     static QByteArray Serialize(
         const AccentProfile& obj,
         QJsonDocument::JsonFormat format = QJsonDocument::Indented);
 
-    bool isValid() const;
+    QFileInfo fileInfo() const { return fileInfo_; }
+    QString filePath() const { return fileInfo_.absoluteFilePath(); }
+    bool isEmpty() const;
+
     static void printJsonAccentProfileExample();
     void print(const QJsonDocument::JsonFormat& format =
                    QJsonDocument::Indented) const;
@@ -53,5 +55,6 @@ class AccentProfile {
 
     // QHas<Key QPair<lower, upper>>
     QHash<Qt::Key, QPair<QList<QChar>, QList<QChar>>> accents_;
+    QFileInfo fileInfo_;
 };
 };  // namespace Altccents

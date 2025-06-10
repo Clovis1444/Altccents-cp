@@ -61,10 +61,10 @@ void ReadAccentProfiles(const QString& dir_path) {
         f.close();
 
         info(QString{"Deserializing \"%1\""}.arg(i.absoluteFilePath()));
-        AccentProfile profile{AccentProfile::Deserialize(file_data)};
+        AccentProfile profile{AccentProfile::Deserialize(file_data, i)};
 
         // Check if profile is Valid
-        if (profile.isValid()) {
+        if (profile.isEmpty()) {
             profiles.push_back(profile);
             info(QString{"\"%1\" was successfully deserialized"}.arg(
                 i.absoluteFilePath()));
