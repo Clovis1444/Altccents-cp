@@ -9,5 +9,8 @@ int main() {
         qInfo() << i.name();
         i.print();
     }
+
+    Altccents::Settings::loadSettings();
+
     return 0;
 }
