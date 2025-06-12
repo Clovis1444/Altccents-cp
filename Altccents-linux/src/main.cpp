@@ -11,6 +11,10 @@ int main() {
     }
 
     Altccents::Settings::loadSettings();
+    qInfo() << "Active profile:"
+            << Altccents::Settings::get(Altccents::Settings::kActiveProfile);
+
+    Altccents::Settings::saveSettings();
 
     return 0;
 }
