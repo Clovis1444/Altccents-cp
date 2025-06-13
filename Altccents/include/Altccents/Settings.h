@@ -1,3 +1,5 @@
+#include <qvariant.h>
+
 #include <QDir>
 #include <QHash>
 #include <QSettings>
@@ -31,6 +33,7 @@ class Settings {
         kActiveProfile,
         // QList<QString>
         kLoadedProfiles,
+        kNum,
         // Insert new members here
         kEnumLength
     };
@@ -49,18 +52,23 @@ class Settings {
         }
     }
 
-    // TODO(clovis): is settings.value() always returns QVariant<QString> type?
-    // If so - bad. Find a way to cast type def_val metaType
     static void loadSettings() {
         QSettings settings{kSettingsFilePath, QSettings::IniFormat};
 
         for (SettingEntry& i : settings_) {
-            QVariant new_val{settings.value(i.key, i.def_val)};
+            QVariant new_val{settings.value(i.key)};
 
-            if (new_val.metaType() == i.def_val.metaType() &&
-                new_val.isValid()) {
-                i.val = new_val;
+            // If key value is an empty string - set val as def_val
+            if (new_val.toString().isEmpty()) {
+                i.val = i.def_val;
+                continue;
             }
+
+            // Cast value *** from file to the def_val type
+            bool cast_result{new_val.convert(i.def_val.metaType())};
+
+            // Set val
+            i.val = cast_result ? new_val : i.def_val;
         }
     }
 
@@ -118,9 +126,12 @@ class Settings {
     // - key and def_val MUST not be changed
     inline static QHash<SettingsType, SettingEntry> settings_{
         {kActiveProfile,
-         {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
+         {.key{"Cache/active_profile"}, .def_val{QString{"piska"}}, .val{}}},
         {kLoadedProfiles,
-         {.key{"Cache/loaded_profiles"}, .def_val{QList<QString>{}}, .val{}}},
+         {.key{"Cache/loaded_profiles"},
+          .def_val{QList<QString>{"susssss"}},
+          .val{}}},
+        {kNum, {.key{"Cache/num"}, .def_val{int{322}}, .val{}}},
         //
     };
 };
