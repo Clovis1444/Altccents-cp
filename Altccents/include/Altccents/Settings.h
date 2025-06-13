@@ -1,9 +1,8 @@
-#include <qvariant.h>
-
 #include <QDir>
 #include <QHash>
 #include <QSettings>
 #include <QString>
+#include <QVariant>
 
 namespace Altccents {
 class Settings {
@@ -29,16 +28,12 @@ class Settings {
 
     // NOLINTNEXTLINE
     enum SettingsType {
-        // QString
         kActiveProfile,
-        // QList<QString>
         kLoadedProfiles,
-        kNum,
         // Insert new members here
         kEnumLength
     };
 
-    // TODO(clovis): fix invalid values save and loading
     static void saveSettings() {
         QSettings settings{kSettingsFilePath, QSettings::IniFormat};
 
@@ -113,7 +108,6 @@ class Settings {
     }
 
    private:
-    // TODO(clovis): find a way to make key and def_val const
     struct SettingEntry {
         QString key;
         QVariant def_val;
@@ -121,17 +115,15 @@ class Settings {
     };
 
     // IMPORTANT:
+    // - SettingEntry variable data type MUST be defined in def_val
     // - settings_.count() == SettingsType::kEnumLength MUST be true
     // - def_val type MUST be defined in settings_
     // - key and def_val MUST not be changed
     inline static QHash<SettingsType, SettingEntry> settings_{
         {kActiveProfile,
-         {.key{"Cache/active_profile"}, .def_val{QString{"piska"}}, .val{}}},
+         {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
         {kLoadedProfiles,
-         {.key{"Cache/loaded_profiles"},
-          .def_val{QList<QString>{"susssss"}},
-          .val{}}},
-        {kNum, {.key{"Cache/num"}, .def_val{int{322}}, .val{}}},
+         {.key{"Cache/loaded_profiles"}, .def_val{QList<QString>{}}, .val{}}}
         //
     };
 };
