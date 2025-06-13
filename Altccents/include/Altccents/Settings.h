@@ -57,7 +57,8 @@ class Settings {
         for (SettingEntry& i : settings_) {
             QVariant new_val{settings.value(i.key, i.def_val)};
 
-            if (new_val.metaType() == i.def_val.metaType()) {
+            if (new_val.metaType() == i.def_val.metaType() &&
+                new_val.isValid()) {
                 i.val = new_val;
             }
         }
@@ -119,6 +120,8 @@ class Settings {
         {kActiveProfile,
          {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
         {kLoadedProfiles,
-         {.key{"Cache/loaded_profiles"}, .def_val{QList<QString>{}}, .val{}}}};
+         {.key{"Cache/loaded_profiles"}, .def_val{QList<QString>{}}, .val{}}},
+        //
+    };
 };
 }  // namespace Altccents
