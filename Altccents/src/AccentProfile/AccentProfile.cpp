@@ -70,11 +70,11 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
     }
 };
 
-AccentProfile AccentProfile::Deserialize(const QByteArray& data,
+AccentProfile AccentProfile::deserialize(const QByteArray& data,
                                          const QFileInfo& fileInfo) {
     return AccentProfile{data, fileInfo};
 };
-QByteArray AccentProfile::Serialize(const AccentProfile& obj,
+QByteArray AccentProfile::serialize(const AccentProfile& obj,
                                     QJsonDocument::JsonFormat format) {
     return obj.toQJsonDocument().toJson(format);
 };

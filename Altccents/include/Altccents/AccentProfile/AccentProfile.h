@@ -15,9 +15,9 @@ class AccentProfile {
     AccentProfile(const QByteArray& data, const QFileInfo& fileInfo);
     AccentProfile() = default;
 
-    static AccentProfile Deserialize(const QByteArray& data,
+    static AccentProfile deserialize(const QByteArray& data,
                                      const QFileInfo& fileInfo);
-    static QByteArray Serialize(
+    static QByteArray serialize(
         const AccentProfile& obj,
         QJsonDocument::JsonFormat format = QJsonDocument::Indented);
 

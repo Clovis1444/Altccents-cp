@@ -21,7 +21,7 @@ void info(const QString& text) {
 
 // PUBLIC
 namespace Altccents {
-QList<AccentProfile> ReadAccentProfiles(const QString& dir_path) {
+QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     QDir dir{dir_path};
     // Check if dir exists
     if (!dir.exists()) {
@@ -61,7 +61,7 @@ QList<AccentProfile> ReadAccentProfiles(const QString& dir_path) {
         f.close();
 
         info(QString{"Deserializing \"%1\""}.arg(i.absoluteFilePath()));
-        AccentProfile profile{AccentProfile::Deserialize(file_data, i)};
+        AccentProfile profile{AccentProfile::deserialize(file_data, i)};
 
         // Check if profile is Valid
         if (profile.isEmpty()) {
@@ -78,7 +78,7 @@ QList<AccentProfile> ReadAccentProfiles(const QString& dir_path) {
 }
 
 bool AltccentsApp::loadAccentProfiles(const QString& dir) {
-    QList<AccentProfile> profiles{ReadAccentProfiles(dir)};
+    QList<AccentProfile> profiles{readAccentProfiles(dir)};
     // Check if find any valid profile
     if (profiles.isEmpty()) {
         return false;

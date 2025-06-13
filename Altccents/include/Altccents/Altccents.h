@@ -6,7 +6,7 @@
 #include "Altccents/Settings.h"
 
 namespace Altccents {
-QList<AccentProfile> ReadAccentProfiles(const QString& dir);
+QList<AccentProfile> readAccentProfiles(const QString& dir);
 
 class AltccentsApp {
    public:
