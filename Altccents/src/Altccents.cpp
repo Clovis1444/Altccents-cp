@@ -23,11 +23,14 @@ void info(const QString& text) {
 namespace Altccents {
 QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     QDir dir{dir_path};
-    // Check if dir exists
+    // If dir does not exists - create it
     if (!dir.exists()) {
-        QString e{"Directory %1 does not exist"};
-        warning(e.arg(dir.absolutePath()));
-        return {};
+        // If failed to create dir
+        if (!QDir().mkdir(dir.absolutePath())) {
+            QString e{"Failed to create %1 dir"};
+            warning(e.arg(dir.absolutePath()));
+            return {};
+        }
     }
 
     dir.setFilter(QDir::Files);
@@ -77,6 +80,12 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     return profiles;
 }
 
+AltccentsApp::AltccentsApp() {
+    // Accent Profiles MUST be loaded before config
+    loadAccentProfiles();
+    loadConfig();
+}
+
 bool AltccentsApp::loadAccentProfiles(const QString& dir) {
     QList<AccentProfile> profiles{readAccentProfiles(dir)};
     // Check if find any valid profile
@@ -102,4 +111,43 @@ bool AltccentsApp::loadAccentProfiles(const QString& dir) {
 
     return true;
 }
+
+void AltccentsApp::loadConfig() {
+    Settings::loadSettings();
+
+    for (int i{}; i < static_cast<int>(Settings::kEnumLength); ++i) {
+        Settings::SettingsType s{static_cast<Settings::SettingsType>(i)};
+
+        switch (s) {
+            case Settings::kActiveProfile: {
+                QString s_val{Settings::get(s).toString()};
+                setActiveProfile(s_val);
+                break;
+            }
+            case Settings::kEnumLength: {
+                break;
+            }
+        }
+    }
+}
+
+QString AltccentsApp::activeProfileName() const {
+    return activeAccentProfile_.name();
+}
+
+void AltccentsApp::setActiveProfile(const AccentProfile& profile) {
+    if (loadedAccentProfiles_.contains(profile)) {
+        activeAccentProfile_ = profile;
+    }
+}
+// profile param may be profile name or profile file absolute path
+void AltccentsApp::setActiveProfile(const QString& profile) {
+    for (const AccentProfile& i : loadedAccentProfiles_) {
+        if (i.name() == profile || i.filePath() == profile) {
+            setActiveProfile(i);
+            return;
+        }
+    }
+}
+
 }  // namespace Altccents

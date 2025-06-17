@@ -15,6 +15,10 @@ class AccentProfile {
     AccentProfile(const QByteArray& data, const QFileInfo& fileInfo);
     AccentProfile() = default;
 
+    bool operator==(const AccentProfile& other) const {
+        return accents_ == other.accents_ && fileInfo_ == other.fileInfo_;
+    }
+
     static AccentProfile deserialize(const QByteArray& data,
                                      const QFileInfo& fileInfo);
     static QByteArray serialize(

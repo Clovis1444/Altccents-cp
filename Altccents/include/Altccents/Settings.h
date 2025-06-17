@@ -29,7 +29,6 @@ class Settings {
     // NOLINTNEXTLINE
     enum SettingsType {
         kActiveProfile,
-        kLoadedProfiles,
         // Insert new members here
         kEnumLength
     };
@@ -48,6 +47,11 @@ class Settings {
     }
 
     static void loadSettings() {
+        // Clear current settings vals
+        for (auto i : settings_) {
+            i.val = {};
+        }
+
         QSettings settings{kSettingsFilePath, QSettings::IniFormat};
 
         for (SettingEntry& i : settings_) {
@@ -122,8 +126,6 @@ class Settings {
     inline static QHash<SettingsType, SettingEntry> settings_{
         {kActiveProfile,
          {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
-        {kLoadedProfiles,
-         {.key{"Cache/loaded_profiles"}, .def_val{QList<QString>{}}, .val{}}}
         //
     };
 };
