@@ -10,8 +10,9 @@ class Settings {
     inline static const QString kProgramName{"Altccents"};
 
 #ifdef __linux__
-    inline static const QString kSettingsDir{
-        QDir::home().absolutePath() + "/." + kProgramName.toLower() + '/'};
+    inline static const QString kSettingsDir{QDir::home().absolutePath() +
+                                             "/.config/" +
+                                             kProgramName.toLower() + '/'};
 // TODO(clovis)
 #elifdef _WIN32
     inline static const QString kSettingsDir{""};

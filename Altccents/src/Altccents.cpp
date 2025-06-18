@@ -26,7 +26,7 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     // If dir does not exists - create it
     if (!dir.exists()) {
         // If failed to create dir
-        if (!QDir().mkdir(dir.absolutePath())) {
+        if (!QDir().mkpath(dir.absolutePath())) {
             QString e{"Failed to create %1 dir"};
             warning(e.arg(dir.absolutePath()));
             return {};
