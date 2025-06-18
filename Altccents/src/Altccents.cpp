@@ -150,4 +150,32 @@ void AltccentsApp::setActiveProfile(const QString& profile) {
     }
 }
 
+QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
+    // If there is no key in the profile - return
+    if (!activeAccentProfile_.contains(key)) {
+        lastAccent_ = {};
+        return {};
+    }
+
+    QList<QChar> chars{activeAccentProfile_.chars(key, is_capital)};
+
+    // If there is no chars for this Case - return
+    if (chars.isEmpty()) {
+        lastAccent_ = {};
+        return {};
+    }
+
+    // If AccentInput is the same as last one - just change index
+    if (lastAccent_.key == key && lastAccent_.is_capital == is_capital) {
+        int index{
+            lastAccent_.index >= chars.count() - 1 ? 0 : lastAccent_.index + 1};
+
+        lastAccent_.index = index;
+        return chars[index];
+    }
+    // Otherwise - return char with index 0
+    lastAccent_ = {key, is_capital, 0};
+    return chars[0];
+}
+
 }  // namespace Altccents

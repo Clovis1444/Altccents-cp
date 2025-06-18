@@ -38,6 +38,11 @@ class AccentProfile {
     void print(const QJsonDocument::JsonFormat& format =
                    QJsonDocument::Indented) const;
 
+    bool contains(Qt::Key key) const { return accents_.contains(key); };
+    QList<QChar> chars(Qt::Key key, bool is_capital) const {
+        return is_capital ? accents_[key].second : accents_[key].first;
+    };
+
    private:
     static QList<QChar> decerializeCharArr(const QJsonArray& json_arr);
 

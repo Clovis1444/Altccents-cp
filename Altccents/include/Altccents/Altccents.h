@@ -25,8 +25,18 @@ class AltccentsApp {
     void setActiveProfile(const AccentProfile& profile);
     void setActiveProfile(const QString& profile);
 
+    QChar nextAccent(const Qt::Key& key, bool is_capital);
+
    private:
     AccentProfile activeAccentProfile_;
     QList<AccentProfile> loadedAccentProfiles_;
+
+    struct AccentInput {
+        Qt::Key key;
+        bool is_capital;
+        int index;
+    };
+
+    AccentInput lastAccent_{};
 };
 }  // namespace Altccents
