@@ -9,7 +9,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/Altccents.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/AccentProfile/AccentProfile.cpp
 )
 
-target_link_libraries(Altccents PRIVATE Qt6::Core)
+target_link_libraries(Altccents PRIVATE Qt6::Core Qt6::Widgets)
 
 # Note: use PUBLIC to propagate include dir to the parent
 target_include_directories(Altccents PUBLIC include)

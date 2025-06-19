@@ -1,10 +1,11 @@
 #include "Altccents/Altccents.h"
 
-#include <qlist.h>
-
+#include <QApplication>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QList>
+#include <QMainWindow>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
 
@@ -174,8 +175,17 @@ QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
         return chars[index];
     }
     // Otherwise - return char with index 0
-    lastAccent_ = {key, is_capital, 0};
+    lastAccent_ = {.key = key, .is_capital = is_capital, .index = 0};
     return chars[0];
+}
+
+int AltccentsApp::loop(int argc, char** argv) {
+    QApplication a{argc, argv};
+
+    QMainWindow w{};
+    w.show();
+
+    return QApplication::exec();
 }
 
 }  // namespace Altccents

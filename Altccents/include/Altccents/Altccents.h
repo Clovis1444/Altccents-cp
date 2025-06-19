@@ -27,6 +27,8 @@ class AltccentsApp {
 
     QChar nextAccent(const Qt::Key& key, bool is_capital);
 
+    int loop(int argc, char** argv);
+
    private:
     AccentProfile activeAccentProfile_;
     QList<AccentProfile> loadedAccentProfiles_;
