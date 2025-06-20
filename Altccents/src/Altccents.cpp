@@ -6,6 +6,9 @@
 #include <QFile>
 #include <QList>
 #include <QMainWindow>
+#include <QMenu>
+#include <QMessageBox>
+#include <QSystemTrayIcon>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
 
@@ -182,8 +185,39 @@ QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
 int AltccentsApp::loop(int argc, char** argv) {
     QApplication a{argc, argv};
 
-    QMainWindow w{};
-    w.show();
+    /// Tray icon
+    QSystemTrayIcon* tray_icon{new QSystemTrayIcon{}};
+    // Icon
+    tray_icon->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::Phone));
+    // Context Menu
+    QMenu* context_menu{new QMenu{}};
+    context_menu->addAction(
+        QIcon::fromTheme(QIcon::ThemeIcon::AudioCard), "First action", []() {
+            QMessageBox::information(nullptr, "Context Menu Action",
+                                     "First Action was called!");
+        });
+    context_menu->addAction(
+        QIcon::fromTheme(QIcon::ThemeIcon::EmblemMail), "Second action", []() {
+            QMessageBox::information(nullptr, "Context Menu Action",
+                                     "Second Action was called!");
+        });
+    context_menu->addSeparator();
+    context_menu->addAction("Exit", []() { QApplication::exit(); });
+
+    tray_icon->setContextMenu(context_menu);
+
+    // On click
+    QObject::connect(tray_icon, &QSystemTrayIcon::activated, [&]() {
+        tray_icon->showMessage(
+            "Tray icon message", "You clicked on a tray icon!",
+            QIcon::fromTheme(QIcon::ThemeIcon::DialogInformation), 3000);
+    });
+
+    // Tooltip
+    tray_icon->setToolTip("My cool tray icon");
+
+    tray_icon->show();
+    ///
 
     return QApplication::exec();
 }
