@@ -13,5 +13,5 @@ int main(int argc, char** argv) {
     qInfo() << QString{altccents.nextAccent(static_cast<Qt::Key>(69), false)};
     qInfo() << QString{altccents.nextAccent(static_cast<Qt::Key>(69), true)};
 
-    return altccents.loop(argc, argv);
+    return altccents.start(argc, argv);
 }

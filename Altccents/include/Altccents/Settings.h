@@ -1,3 +1,5 @@
+#include <QtWidgets/qapplication.h>
+
 #include <QDir>
 #include <QHash>
 #include <QSettings>
@@ -22,10 +24,17 @@ class Settings {
 #endif
 
     inline static const QString kAccentProfileDir{kSettingsDir + "profiles/"};
+    // TODO(clovis)
+    inline static const QString kResourcesDir{
+        QApplication::applicationDirPath() + "resources/"};
 
     inline static const QString kSettingsFileName{"settings.ini"};
     inline static const QString kSettingsFilePath{kSettingsDir +
                                                   kSettingsFileName};
+
+    inline static const QString kLogoFilePath{kResourcesDir + "logo128.png"};
+    inline static const QString kLogoOnFilePath{kResourcesDir +
+                                                "logo128_on.png"};
 
     // NOLINTNEXTLINE
     enum SettingsType {

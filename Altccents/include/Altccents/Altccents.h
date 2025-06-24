@@ -1,4 +1,6 @@
 #pragma once
+#include <QtWidgets/qsystemtrayicon.h>
+
 #include <QList>
 #include <QString>
 
@@ -11,6 +13,7 @@ QList<AccentProfile> readAccentProfiles(const QString& dir);
 class AltccentsApp {
    public:
     AltccentsApp();
+    ~AltccentsApp();
 
     bool loadAccentProfiles(const QString& dir = Settings::kAccentProfileDir);
 
@@ -27,11 +30,20 @@ class AltccentsApp {
 
     QChar nextAccent(const Qt::Key& key, bool is_capital);
 
-    int loop(int argc, char** argv);
+    void createTrayIcon();
+
+    int start(int argc, char** argv);
+
+    void updateTrayIcon();
 
    private:
     AccentProfile activeAccentProfile_;
     QList<AccentProfile> loadedAccentProfiles_;
+
+    QSystemTrayIcon* trayIcon_{};
+
+    // TODO(clovis): add config setting for this
+    bool isAppOn_{};
 
     struct AccentInput {
         Qt::Key key;

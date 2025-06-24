@@ -90,6 +90,8 @@ AltccentsApp::AltccentsApp() {
     loadConfig();
 }
 
+AltccentsApp::~AltccentsApp() { delete trayIcon_; };
+
 bool AltccentsApp::loadAccentProfiles(const QString& dir) {
     QList<AccentProfile> profiles{readAccentProfiles(dir)};
     // Check if find any valid profile
@@ -182,14 +184,14 @@ QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
     return chars[0];
 }
 
-int AltccentsApp::loop(int argc, char** argv) {
-    QApplication a{argc, argv};
+void AltccentsApp::createTrayIcon() {
+    delete trayIcon_;
+    trayIcon_ = new QSystemTrayIcon{};
 
-    /// Tray icon
-    QSystemTrayIcon* tray_icon{new QSystemTrayIcon{}};
-    // Icon
-    tray_icon->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::Phone));
+    updateTrayIcon();
+
     // Context Menu
+    // TODO(clovis): create context menu
     QMenu* context_menu{new QMenu{}};
     context_menu->addAction(
         QIcon::fromTheme(QIcon::ThemeIcon::AudioCard), "First action", []() {
@@ -204,22 +206,41 @@ int AltccentsApp::loop(int argc, char** argv) {
     context_menu->addSeparator();
     context_menu->addAction("Exit", []() { QApplication::exit(); });
 
-    tray_icon->setContextMenu(context_menu);
+    trayIcon_->setContextMenu(context_menu);
 
     // On click
-    QObject::connect(tray_icon, &QSystemTrayIcon::activated, [&]() {
-        tray_icon->showMessage(
-            "Tray icon message", "You clicked on a tray icon!",
-            QIcon::fromTheme(QIcon::ThemeIcon::DialogInformation), 3000);
+    QObject::connect(trayIcon_, &QSystemTrayIcon::activated, [&]() {
+        isAppOn_ = !isAppOn_;
+
+        updateTrayIcon();
+
+        // trayIcon_->showMessage(
+        //     Settings::kProgramName,
+        //     Settings::kProgramName + (isAppOn_ ? " turn on" : "turn off"),
+        //     QIcon::fromTheme(QIcon::ThemeIcon::DialogInformation), 3000);
     });
 
     // Tooltip
-    tray_icon->setToolTip("My cool tray icon");
+    trayIcon_->setToolTip(Settings::kProgramName);
 
-    tray_icon->show();
-    ///
+    trayIcon_->show();
+}
+
+int AltccentsApp::start(int argc, char** argv) {
+    QApplication a{argc, argv};
+
+    createTrayIcon();
 
     return QApplication::exec();
 }
+
+void AltccentsApp::updateTrayIcon() {
+    if (!trayIcon_) {
+        return;
+    }
+
+    trayIcon_->setIcon(
+        QIcon{isAppOn_ ? Settings::kLogoOnFilePath : Settings::kLogoFilePath});
+};
 
 }  // namespace Altccents
