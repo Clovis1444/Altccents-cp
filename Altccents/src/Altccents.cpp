@@ -85,6 +85,8 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
 }
 
 AltccentsApp::AltccentsApp() {
+    // Without this line the program will close after closing message box
+    QApplication::setQuitOnLastWindowClosed(false);
     // Accent Profiles MUST be loaded before config
     loadAccentProfiles();
     loadConfig();
@@ -209,16 +211,21 @@ void AltccentsApp::createTrayIcon() {
     trayIcon_->setContextMenu(context_menu);
 
     // On click
-    QObject::connect(trayIcon_, &QSystemTrayIcon::activated, [&]() {
-        isAppOn_ = !isAppOn_;
+    QObject::connect(trayIcon_, &QSystemTrayIcon::activated,
+                     [&](QSystemTrayIcon::ActivationReason r) {
+                         switch (r) {
+                                 // On single left click
+                             case QSystemTrayIcon::Trigger: {
+                                 isAppOn_ = !isAppOn_;
 
-        updateTrayIcon();
+                                 updateTrayIcon();
 
-        // trayIcon_->showMessage(
-        //     Settings::kProgramName,
-        //     Settings::kProgramName + (isAppOn_ ? " turn on" : "turn off"),
-        //     QIcon::fromTheme(QIcon::ThemeIcon::DialogInformation), 3000);
-    });
+                                 break;
+                             }
+                             default:
+                                 break;
+                         }
+                     });
 
     // Tooltip
     trayIcon_->setToolTip(Settings::kProgramName);
