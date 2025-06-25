@@ -25,6 +25,8 @@ class Settings {
 
     inline static const QString kAccentProfileDir{kSettingsDir + "profiles/"};
     // TODO(clovis)
+    // TODO(clovis): when QApplication::applicationDirPath() called -
+    // QApplication is not yet created
     inline static const QString kResourcesDir{
         QApplication::applicationDirPath() + "resources/"};
 

@@ -24,9 +24,11 @@ class AltccentsApp {
     void loadConfig();
 
     QString activeProfileName() const;
+    AccentProfile activeProfile() const;
 
     void setActiveProfile(const AccentProfile& profile);
     void setActiveProfile(const QString& profile);
+    void setActiveProfile();
 
     QChar nextAccent(const Qt::Key& key, bool is_capital);
 
@@ -35,15 +37,18 @@ class AltccentsApp {
     int start(int argc, char** argv);
 
     void updateTrayIcon();
+    void updateTrayMenu();
+    void updateTrayToolTip();
 
    private:
     AccentProfile activeAccentProfile_;
     QList<AccentProfile> loadedAccentProfiles_;
 
-    QSystemTrayIcon* trayIcon_{};
+    QSystemTrayIcon* tray_{};
+    QMenu* trayMenu_{};
 
     // TODO(clovis): add config setting for this
-    bool isAppOn_{};
+    bool isProgramOn_{};
 
     struct AccentInput {
         Qt::Key key;

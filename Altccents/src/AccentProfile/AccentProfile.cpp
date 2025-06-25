@@ -79,7 +79,7 @@ QByteArray AccentProfile::serialize(const AccentProfile& obj,
     return obj.toQJsonDocument().toJson(format);
 };
 
-bool AccentProfile::isEmpty() const { return !accents_.isEmpty(); };
+bool AccentProfile::isEmpty() const { return accents_.isEmpty(); };
 
 void AccentProfile::printJsonAccentProfileExample() {
     qInfo().noquote() << kJsonAccentProfileExample.trimmed();

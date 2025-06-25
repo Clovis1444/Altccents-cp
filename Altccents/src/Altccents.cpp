@@ -1,7 +1,9 @@
 #include "Altccents/Altccents.h"
 
+#include <QActionGroup>
 #include <QApplication>
 #include <QDebug>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QList>
@@ -71,7 +73,7 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
         AccentProfile profile{AccentProfile::deserialize(file_data, i)};
 
         // Check if profile is Valid
-        if (profile.isEmpty()) {
+        if (!profile.isEmpty()) {
             profiles.push_back(profile);
             info(QString{"\"%1\" was successfully deserialized"}.arg(
                 i.absoluteFilePath()));
@@ -92,12 +94,17 @@ AltccentsApp::AltccentsApp() {
     loadConfig();
 }
 
-AltccentsApp::~AltccentsApp() { delete trayIcon_; };
+AltccentsApp::~AltccentsApp() {
+    delete tray_;
+    delete trayMenu_;
+};
 
 bool AltccentsApp::loadAccentProfiles(const QString& dir) {
     QList<AccentProfile> profiles{readAccentProfiles(dir)};
     // Check if find any valid profile
     if (profiles.isEmpty()) {
+        updateTrayMenu();
+        setActiveProfile();
         return false;
     }
 
@@ -108,15 +115,16 @@ bool AltccentsApp::loadAccentProfiles(const QString& dir) {
     bool found_active_profile{};
     for (const AccentProfile& i : loadedAccentProfiles_) {
         if (i.accents() == activeAccentProfile_.accents()) {
-            activeAccentProfile_ = i;
+            setActiveProfile(i);
             found_active_profile = true;
             break;
         }
     }
     if (!found_active_profile) {
-        activeAccentProfile_ = {};
+        setActiveProfile();
     }
 
+    updateTrayMenu();
     return true;
 }
 
@@ -142,11 +150,16 @@ void AltccentsApp::loadConfig() {
 QString AltccentsApp::activeProfileName() const {
     return activeAccentProfile_.name();
 }
+AccentProfile AltccentsApp::activeProfile() const {
+    return activeAccentProfile_;
+}
 
 void AltccentsApp::setActiveProfile(const AccentProfile& profile) {
     if (loadedAccentProfiles_.contains(profile)) {
         activeAccentProfile_ = profile;
     }
+
+    updateTrayToolTip();
 }
 // profile param may be profile name or profile file absolute path
 void AltccentsApp::setActiveProfile(const QString& profile) {
@@ -156,6 +169,12 @@ void AltccentsApp::setActiveProfile(const QString& profile) {
             return;
         }
     }
+}
+// Set active profile to None
+void AltccentsApp::setActiveProfile() {
+    activeAccentProfile_ = {};
+
+    updateTrayToolTip();
 }
 
 QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
@@ -187,50 +206,27 @@ QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
 }
 
 void AltccentsApp::createTrayIcon() {
-    delete trayIcon_;
-    trayIcon_ = new QSystemTrayIcon{};
+    if (!tray_) {
+        tray_ = new QSystemTrayIcon{};
+    }
 
     updateTrayIcon();
 
-    // Context Menu
-    // TODO(clovis): create context menu
-    QMenu* context_menu{new QMenu{}};
-    context_menu->addAction(
-        QIcon::fromTheme(QIcon::ThemeIcon::AudioCard), "First action", []() {
-            QMessageBox::information(nullptr, "Context Menu Action",
-                                     "First Action was called!");
-        });
-    context_menu->addAction(
-        QIcon::fromTheme(QIcon::ThemeIcon::EmblemMail), "Second action", []() {
-            QMessageBox::information(nullptr, "Context Menu Action",
-                                     "Second Action was called!");
-        });
-    context_menu->addSeparator();
-    context_menu->addAction("Exit", []() { QApplication::exit(); });
-
-    trayIcon_->setContextMenu(context_menu);
-
+    updateTrayMenu();
     // On click
-    QObject::connect(trayIcon_, &QSystemTrayIcon::activated,
+    QObject::connect(tray_, &QSystemTrayIcon::activated,
                      [&](QSystemTrayIcon::ActivationReason r) {
-                         switch (r) {
-                                 // On single left click
-                             case QSystemTrayIcon::Trigger: {
-                                 isAppOn_ = !isAppOn_;
-
-                                 updateTrayIcon();
-
-                                 break;
-                             }
-                             default:
-                                 break;
+                         // On single left click
+                         if (r == QSystemTrayIcon::Trigger) {
+                             isProgramOn_ = !isProgramOn_;
+                             updateTrayIcon();
                          }
                      });
 
     // Tooltip
-    trayIcon_->setToolTip(Settings::kProgramName);
+    updateTrayToolTip();
 
-    trayIcon_->show();
+    tray_->show();
 }
 
 int AltccentsApp::start(int argc, char** argv) {
@@ -242,12 +238,105 @@ int AltccentsApp::start(int argc, char** argv) {
 }
 
 void AltccentsApp::updateTrayIcon() {
-    if (!trayIcon_) {
+    if (!tray_) {
         return;
     }
 
-    trayIcon_->setIcon(
-        QIcon{isAppOn_ ? Settings::kLogoOnFilePath : Settings::kLogoFilePath});
+    tray_->setIcon(QIcon{isProgramOn_ ? Settings::kLogoOnFilePath
+                                      : Settings::kLogoFilePath});
 };
 
+void AltccentsApp::updateTrayMenu() {
+    if (!tray_) {
+        return;
+    }
+
+    if (!trayMenu_) {
+        trayMenu_ = new QMenu{};
+    }
+
+    static QAction* insert_profiles_at;
+
+    // Create tray menu from scratch
+    if (trayMenu_->isEmpty()) {
+        //
+        QAction* update_profiles_action{
+            new QAction{"Update profiles", trayMenu_}};
+        QObject::connect(update_profiles_action, &QAction::triggered,
+                         [this]() { this->loadAccentProfiles(); });
+        trayMenu_->addAction(update_profiles_action);
+        trayMenu_->addSeparator();
+
+        //
+        QAction* open_config_dir_action{
+            new QAction{"Open config dir", trayMenu_}};
+        QObject::connect(open_config_dir_action, &QAction::triggered, []() {
+            QDesktopServices::openUrl(Settings::kSettingsDir);
+        });
+        trayMenu_->addAction(open_config_dir_action);
+        trayMenu_->addSeparator();
+
+        //
+        QAction* profiles_action{new QAction{"Profiles", trayMenu_}};
+        profiles_action->setDisabled(true);
+        trayMenu_->addAction(profiles_action);
+
+        // Profile actions will be here
+
+        insert_profiles_at = trayMenu_->addSeparator();
+
+        //
+        trayMenu_->addAction("Exit", []() { QApplication::exit(); });
+
+        tray_->setContextMenu(trayMenu_);
+    }  // End of tray menu creation
+
+    // Uodate profile actions
+    static QActionGroup* profile_actions_group{new QActionGroup{trayMenu_}};
+    profile_actions_group->setExclusionPolicy(
+        QActionGroup::ExclusionPolicy::ExclusiveOptional);
+
+    // Remove all profile actions
+    for (auto* i : trayMenu_->actions()) {
+        if (i->actionGroup() == profile_actions_group) {
+            trayMenu_->removeAction(i);
+        }
+    }
+
+    // Create all profile actions
+    QList<QAction*> profile_action_list{};
+    for (const auto& i : loadedAccentProfiles_) {
+        QAction* profile_action{new QAction{i.name(), trayMenu_}};
+        profile_action->setCheckable(true);
+        profile_action->setToolTip(i.filePath());
+        profile_action->setActionGroup(profile_actions_group);
+
+        if (activeProfileName() == i.name()) {
+            profile_action->setChecked(true);
+        }
+
+        QObject::connect(profile_action, &QAction::triggered, [&]() {
+            if (activeProfile() == i) {
+                setActiveProfile();
+            } else {
+                this->setActiveProfile(i);
+            }
+        });
+
+        profile_action_list.push_back(profile_action);
+    }
+
+    trayMenu_->insertActions(insert_profiles_at, profile_action_list);
+};
+
+void AltccentsApp::updateTrayToolTip() {
+    if (!tray_) {
+        return;
+    }
+
+    tray_->setToolTip(Settings::kProgramName +
+                      (activeProfile().isEmpty()
+                           ? ""
+                           : QString{"[%1]"}.arg(activeProfileName())));
+};
 }  // namespace Altccents
