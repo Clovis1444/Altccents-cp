@@ -103,7 +103,7 @@ bool AltccentsApp::loadAccentProfiles(const QString& dir) {
     QList<AccentProfile> profiles{readAccentProfiles(dir)};
     // Check if find any valid profile
     if (profiles.isEmpty()) {
-        updateTrayMenu();
+        updateTray();
         setActiveProfile();
         return false;
     }
@@ -124,7 +124,7 @@ bool AltccentsApp::loadAccentProfiles(const QString& dir) {
         setActiveProfile();
     }
 
-    updateTrayMenu();
+    updateTray();
     return true;
 }
 
@@ -159,7 +159,7 @@ void AltccentsApp::setActiveProfile(const AccentProfile& profile) {
         activeAccentProfile_ = profile;
     }
 
-    updateTrayToolTip();
+    updateTray();
 }
 // profile param may be profile name or profile file absolute path
 void AltccentsApp::setActiveProfile(const QString& profile) {
@@ -174,7 +174,7 @@ void AltccentsApp::setActiveProfile(const QString& profile) {
 void AltccentsApp::setActiveProfile() {
     activeAccentProfile_ = {};
 
-    updateTrayToolTip();
+    updateTray();
 }
 
 QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
@@ -205,7 +205,7 @@ QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
     return chars[0];
 }
 
-void AltccentsApp::createTrayIcon() {
+void AltccentsApp::createTray() {
     if (!tray_) {
         tray_ = new QSystemTrayIcon{};
     }
@@ -219,7 +219,7 @@ void AltccentsApp::createTrayIcon() {
                          // On single left click
                          if (r == QSystemTrayIcon::Trigger) {
                              isProgramOn_ = !isProgramOn_;
-                             updateTrayIcon();
+                             updateTray();
                          }
                      });
 
@@ -232,7 +232,7 @@ void AltccentsApp::createTrayIcon() {
 int AltccentsApp::start(int argc, char** argv) {
     QApplication a{argc, argv};
 
-    createTrayIcon();
+    createTray();
 
     return QApplication::exec();
 }
@@ -244,7 +244,7 @@ void AltccentsApp::updateTrayIcon() {
 
     tray_->setIcon(QIcon{isProgramOn_ ? Settings::kLogoOnFilePath
                                       : Settings::kLogoFilePath});
-};
+}
 
 void AltccentsApp::updateTrayMenu() {
     if (!tray_) {
@@ -256,8 +256,10 @@ void AltccentsApp::updateTrayMenu() {
     }
 
     static QAction* insert_profiles_at;
+    static QActionGroup* toggle_program_action_group{
+        new QActionGroup{trayMenu_}};
 
-    // Create tray menu from scratch
+    // Create all static action HERE
     if (trayMenu_->isEmpty()) {
         //
         QAction* update_profiles_action{
@@ -265,7 +267,7 @@ void AltccentsApp::updateTrayMenu() {
         QObject::connect(update_profiles_action, &QAction::triggered,
                          [this]() { this->loadAccentProfiles(); });
         trayMenu_->addAction(update_profiles_action);
-        trayMenu_->addSeparator();
+        // trayMenu_->addSeparator();
 
         //
         QAction* open_config_dir_action{
@@ -274,6 +276,15 @@ void AltccentsApp::updateTrayMenu() {
             QDesktopServices::openUrl(Settings::kSettingsDir);
         });
         trayMenu_->addAction(open_config_dir_action);
+        trayMenu_->addSeparator();
+
+        //
+        QAction* toggle_program_action{
+            new QAction{programState() ? "Turn off" : "Turn on", trayMenu_}};
+        QObject::connect(toggle_program_action, &QAction::triggered,
+                         [this]() { this->toggleProgramState(); });
+        toggle_program_action->setActionGroup(toggle_program_action_group);
+        trayMenu_->addAction(toggle_program_action);
         trayMenu_->addSeparator();
 
         //
@@ -296,10 +307,14 @@ void AltccentsApp::updateTrayMenu() {
     profile_actions_group->setExclusionPolicy(
         QActionGroup::ExclusionPolicy::ExclusiveOptional);
 
-    // Remove all profile actions
+    // Update all dynamic actions HERE
     for (auto* i : trayMenu_->actions()) {
         if (i->actionGroup() == profile_actions_group) {
             trayMenu_->removeAction(i);
+        }
+
+        if (i->actionGroup() == toggle_program_action_group) {
+            i->setText(programState() ? "Turn off" : "Turn on");
         }
     }
 
@@ -308,7 +323,6 @@ void AltccentsApp::updateTrayMenu() {
     for (const auto& i : loadedAccentProfiles_) {
         QAction* profile_action{new QAction{i.name(), trayMenu_}};
         profile_action->setCheckable(true);
-        profile_action->setToolTip(i.filePath());
         profile_action->setActionGroup(profile_actions_group);
 
         if (activeProfileName() == i.name()) {
@@ -327,7 +341,7 @@ void AltccentsApp::updateTrayMenu() {
     }
 
     trayMenu_->insertActions(insert_profiles_at, profile_action_list);
-};
+}
 
 void AltccentsApp::updateTrayToolTip() {
     if (!tray_) {
@@ -338,5 +352,21 @@ void AltccentsApp::updateTrayToolTip() {
                       (activeProfile().isEmpty()
                            ? ""
                            : QString{"[%1]"}.arg(activeProfileName())));
-};
+}
+
+void AltccentsApp::updateTray(AltccentsApp::updateTrayFlag flags) {
+    if (flags & updateTrayFlag::kTrayIcon) updateTrayIcon();
+    if (flags & updateTrayFlag::kTrayMenu) updateTrayMenu();
+    if (flags & updateTrayFlag::kTrayToolTip) updateTrayToolTip();
+}
+
+void AltccentsApp::setProgramState(bool state) {
+    isProgramOn_ = state;
+    updateTray();
+}
+bool AltccentsApp::toggleProgramState() {
+    isProgramOn_ = !isProgramOn_;
+    updateTray();
+    return isProgramOn_;
+}
 }  // namespace Altccents

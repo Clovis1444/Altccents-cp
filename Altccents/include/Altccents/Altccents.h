@@ -32,13 +32,26 @@ class AltccentsApp {
 
     QChar nextAccent(const Qt::Key& key, bool is_capital);
 
-    void createTrayIcon();
+    void createTray();
 
     int start(int argc, char** argv);
 
     void updateTrayIcon();
     void updateTrayMenu();
     void updateTrayToolTip();
+    enum class updateTrayFlag : uint32_t {
+        kNone = 0,
+        kTrayIcon = (1 << 0),
+        kTrayMenu = (1 << 1),
+        kTrayToolTip = (1 << 2),
+        kAll = kTrayIcon | kTrayMenu | kTrayToolTip
+
+    };
+    void updateTray(updateTrayFlag flags = updateTrayFlag::kAll);
+
+    bool programState() const { return isProgramOn_; }
+    void setProgramState(bool state);
+    bool toggleProgramState();
 
    private:
     AccentProfile activeAccentProfile_;
@@ -57,5 +70,17 @@ class AltccentsApp {
     };
 
     AccentInput lastAccent_{};
-};
+};  // AltccentsApp
+
+constexpr AltccentsApp::updateTrayFlag operator|(
+    AltccentsApp::updateTrayFlag a, AltccentsApp::updateTrayFlag b) {
+    return static_cast<AltccentsApp::updateTrayFlag>(static_cast<uint32_t>(a) |
+                                                     static_cast<uint32_t>(b));
+}
+constexpr bool operator&(AltccentsApp::updateTrayFlag a,
+                         AltccentsApp::updateTrayFlag b) {
+    return static_cast<bool>(static_cast<uint32_t>(a) &
+                             static_cast<uint32_t>(b));
+}
+
 }  // namespace Altccents
