@@ -42,9 +42,35 @@ class Settings {
     enum SettingsType {
         kActiveProfile,
         kProgramState,
+        kSaveCache,
         // Insert new members here
         kEnumLength
     };
+
+    // TODO(clovis): implement saveSettings() and saveCache() using this func
+    static void saveSetting(SettingsType s) {
+        // Runtime asserts
+        if (s == SettingsType::kEnumLength) {
+            qFatal() << "Altccents::Settings::get() [FATAL]: wrong "
+                        "SettingsType enum value!";
+        };
+        if (SettingsType::kEnumLength != settings_.count()) {
+            qFatal() << "Altccents::Settings::get() [FATAL]: setting_.count() "
+                        "and SettingsType enum length does not match!";
+        };
+
+        QSettings settings{kSettingsFilePath, QSettings::IniFormat};
+
+        const SettingEntry& entry{settings_[s]};
+
+        // Check if current value is correct
+        if (entry.val.isNull() ||
+            entry.val.metaType() != entry.def_val.metaType()) {
+            settings.setValue(entry.key, entry.def_val);
+        } else {
+            settings.setValue(entry.key, entry.val);
+        }
+    }
 
     static void saveSettings() {
         QSettings settings{kSettingsFilePath, QSettings::IniFormat};
@@ -158,6 +184,7 @@ class Settings {
         {kActiveProfile,
          {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
         {kProgramState, {.key{"Cache/program_state"}, .def_val{true}, .val{}}},
+        {kSaveCache, {.key{"Cache/save_cache"}, .def_val{true}, .val{}}},
         //
     };
 };

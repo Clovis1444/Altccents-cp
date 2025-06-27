@@ -147,6 +147,11 @@ void AltccentsApp::loadConfig() {
                 setProgramState(s_val);
                 break;
             }
+            case Settings::kSaveCache: {
+                bool s_val{Settings::get(s).toBool()};
+                setSaveCache(s_val);
+                break;
+            }
             case Settings::kEnumLength: {
                 break;
             }
@@ -265,6 +270,7 @@ void AltccentsApp::updateTrayMenu() {
     static QAction* insert_profiles_at;
     static QActionGroup* toggle_program_action_group{
         new QActionGroup{trayMenu_}};
+    static QActionGroup* save_cache_action_group{new QActionGroup{trayMenu_}};
 
     // Create all static action HERE
     if (trayMenu_->isEmpty()) {
@@ -311,6 +317,21 @@ void AltccentsApp::updateTrayMenu() {
         insert_profiles_at = trayMenu_->addSeparator();
 
         //
+        QAction* save_cache_action{
+            new QAction{"Save cache on exit", trayMenu_}};
+        save_cache_action->setCheckable(true);
+        save_cache_action->setChecked(saveCache_);
+        QObject::connect(
+            save_cache_action, &QAction::toggled, [save_cache_action, this]() {
+                this->saveCache_ = save_cache_action->isChecked();
+                Settings::set(Settings::kSaveCache, this->saveCahche());
+                Settings::saveSetting(Settings::kSaveCache);
+            });
+        save_cache_action->setActionGroup(save_cache_action_group);
+        save_cache_action_group->setExclusive(false);
+        trayMenu_->addAction(save_cache_action);
+
+        //
         trayMenu_->addAction("Exit", []() { QApplication::exit(); });
 
         tray_->setContextMenu(trayMenu_);
@@ -329,6 +350,10 @@ void AltccentsApp::updateTrayMenu() {
 
         if (i->actionGroup() == toggle_program_action_group) {
             i->setText(programState() ? "Turn off" : "Turn on");
+        }
+
+        if (i->actionGroup() == save_cache_action_group) {
+            i->setChecked(saveCahche());
         }
     }
 
@@ -384,13 +409,24 @@ bool AltccentsApp::toggleProgramState() {
     return programState_;
 }
 
+// Do nothing if saveCache_ == false
 // NOLINTNEXTLINE
 void AltccentsApp::writeCacheToFile() {
+    if (!saveCahche()) {
+        return;
+    }
+
     // Set all cache settings here
     Settings::set(Settings::kActiveProfile, activeProfileName());
     Settings::set(Settings::kProgramState, programState());
+    Settings::set(Settings::kSaveCache, saveCahche());
 
     // Write settings
     Settings::saveCache();
+}
+
+void AltccentsApp::setSaveCache(bool val) {
+    saveCache_ = val;
+    updateTray();
 }
 }  // namespace Altccents

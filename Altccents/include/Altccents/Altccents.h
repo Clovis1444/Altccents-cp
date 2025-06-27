@@ -56,6 +56,9 @@ class AltccentsApp {
 
     void writeCacheToFile();
 
+    bool saveCahche() const { return saveCache_; }
+    void setSaveCache(bool val);
+
    private:
     AccentProfile activeAccentProfile_;
     QList<AccentProfile> loadedAccentProfiles_;
@@ -64,6 +67,8 @@ class AltccentsApp {
     QMenu* trayMenu_{};
 
     bool programState_{};
+
+    bool saveCache_{true};
 
     struct AccentInput {
         Qt::Key key;
