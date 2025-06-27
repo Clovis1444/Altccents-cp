@@ -97,6 +97,8 @@ AltccentsApp::AltccentsApp() {
 AltccentsApp::~AltccentsApp() {
     delete tray_;
     delete trayMenu_;
+
+    writeCacheToFile();
 };
 
 bool AltccentsApp::loadAccentProfiles(const QString& dir) {
@@ -223,7 +225,7 @@ void AltccentsApp::createTray() {
                      [&](QSystemTrayIcon::ActivationReason r) {
                          // On single left click
                          if (r == QSystemTrayIcon::Trigger) {
-                             isProgramOn_ = !isProgramOn_;
+                             programState_ = !programState_;
                              updateTray();
                          }
                      });
@@ -247,8 +249,8 @@ void AltccentsApp::updateTrayIcon() {
         return;
     }
 
-    tray_->setIcon(QIcon{isProgramOn_ ? Settings::kLogoOnFilePath
-                                      : Settings::kLogoFilePath});
+    tray_->setIcon(QIcon{programState_ ? Settings::kLogoOnFilePath
+                                       : Settings::kLogoFilePath});
 }
 
 void AltccentsApp::updateTrayMenu() {
@@ -373,12 +375,22 @@ void AltccentsApp::updateTray(AltccentsApp::updateTrayFlag flags) {
 }
 
 void AltccentsApp::setProgramState(bool state) {
-    isProgramOn_ = state;
+    programState_ = state;
     updateTray();
 }
 bool AltccentsApp::toggleProgramState() {
-    isProgramOn_ = !isProgramOn_;
+    programState_ = !programState_;
     updateTray();
-    return isProgramOn_;
+    return programState_;
+}
+
+// NOLINTNEXTLINE
+void AltccentsApp::writeCacheToFile() {
+    // Set all cache settings here
+    Settings::set(Settings::kActiveProfile, activeProfileName());
+    Settings::set(Settings::kProgramState, programState());
+
+    // Write settings
+    Settings::saveCache();
 }
 }  // namespace Altccents

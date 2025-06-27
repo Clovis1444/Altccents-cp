@@ -39,6 +39,7 @@ class AltccentsApp {
     void updateTrayIcon();
     void updateTrayMenu();
     void updateTrayToolTip();
+    // NOLINTNEXTLINE
     enum class updateTrayFlag : uint32_t {
         kNone = 0,
         kTrayIcon = (1 << 0),
@@ -49,9 +50,11 @@ class AltccentsApp {
     };
     void updateTray(updateTrayFlag flags = updateTrayFlag::kAll);
 
-    bool programState() const { return isProgramOn_; }
+    bool programState() const { return programState_; }
     void setProgramState(bool state);
     bool toggleProgramState();
+
+    void writeCacheToFile();
 
    private:
     AccentProfile activeAccentProfile_;
@@ -60,8 +63,7 @@ class AltccentsApp {
     QSystemTrayIcon* tray_{};
     QMenu* trayMenu_{};
 
-    // TODO(clovis): add config setting for this
-    bool isProgramOn_{};
+    bool programState_{};
 
     struct AccentInput {
         Qt::Key key;

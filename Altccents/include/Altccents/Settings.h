@@ -124,6 +124,24 @@ class Settings {
         settings_[s].val = val;
     }
 
+    static void saveCache() {
+        QSettings settings{kSettingsFilePath, QSettings::IniFormat};
+
+        for (const SettingEntry& i : settings_) {
+            // Ignore all non cache settings
+            if (!i.key.startsWith("Cache/")) {
+                continue;
+            }
+
+            // Check if current value is correct
+            if (i.val.isNull() || i.val.metaType() != i.def_val.metaType()) {
+                settings.setValue(i.key, i.def_val);
+            } else {
+                settings.setValue(i.key, i.val);
+            }
+        }
+    }
+
    private:
     struct SettingEntry {
         QString key;
