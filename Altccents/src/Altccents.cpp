@@ -140,13 +140,16 @@ void AltccentsApp::loadConfig() {
                 setActiveProfile(s_val);
                 break;
             }
+            case Settings::kProgramState: {
+                bool s_val{Settings::get(s).toBool()};
+                setProgramState(s_val);
+                break;
+            }
             case Settings::kEnumLength: {
                 break;
             }
         }
     }
-
-    updateTray();
 }
 
 QString AltccentsApp::activeProfileName() const {

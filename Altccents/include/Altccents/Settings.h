@@ -41,6 +41,7 @@ class Settings {
     // NOLINTNEXTLINE
     enum SettingsType {
         kActiveProfile,
+        kProgramState,
         // Insert new members here
         kEnumLength
     };
@@ -138,6 +139,7 @@ class Settings {
     inline static QHash<SettingsType, SettingEntry> settings_{
         {kActiveProfile,
          {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
+        {kProgramState, {.key{"Cache/program_state"}, .def_val{true}, .val{}}},
         //
     };
 };
