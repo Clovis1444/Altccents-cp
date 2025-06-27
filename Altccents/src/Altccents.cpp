@@ -145,6 +145,8 @@ void AltccentsApp::loadConfig() {
             }
         }
     }
+
+    updateTray();
 }
 
 QString AltccentsApp::activeProfileName() const {
@@ -262,12 +264,19 @@ void AltccentsApp::updateTrayMenu() {
     // Create all static action HERE
     if (trayMenu_->isEmpty()) {
         //
+        QAction* update_from_config{
+            new QAction{"Update from config", trayMenu_}};
+        QObject::connect(update_from_config, &QAction::triggered,
+                         [this]() { this->loadConfig(); });
+        trayMenu_->addAction(update_from_config);
+
+        //
         QAction* update_profiles_action{
             new QAction{"Update profiles", trayMenu_}};
         QObject::connect(update_profiles_action, &QAction::triggered,
                          [this]() { this->loadAccentProfiles(); });
         trayMenu_->addAction(update_profiles_action);
-        // trayMenu_->addSeparator();
+        trayMenu_->addSeparator();
 
         //
         QAction* open_config_dir_action{

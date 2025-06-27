@@ -75,7 +75,7 @@ class Settings {
                 continue;
             }
 
-            // Cast value *** from file to the def_val type
+            // Cast value obtained from file to the def_val type
             bool cast_result{new_val.convert(i.def_val.metaType())};
 
             // Set val
