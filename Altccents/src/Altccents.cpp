@@ -10,6 +10,7 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QMessageBox>
+#include <QScreen>
 #include <QSystemTrayIcon>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
@@ -97,6 +98,7 @@ AltccentsApp::AltccentsApp() {
 AltccentsApp::~AltccentsApp() {
     delete tray_;
     delete trayMenu_;
+    delete popup_;
 
     writeCacheToFile();
 };
@@ -245,6 +247,8 @@ int AltccentsApp::start(int argc, char** argv) {
     QApplication a{argc, argv};
 
     createTray();
+
+    updatePopup();
 
     return QApplication::exec();
 }
@@ -428,5 +432,45 @@ void AltccentsApp::writeCacheToFile() {
 void AltccentsApp::setSaveCache(bool val) {
     saveCache_ = val;
     updateTray();
+}
+
+void AltccentsApp::updatePopup() {
+    if (!popup_) {
+        popup_ = new QWidget{};
+
+        popup_->setWindowFlag(Qt::FramelessWindowHint);
+        popup_->setWindowFlag(Qt::WindowStaysOnTopHint);
+        // Make the window not appear in taskbar
+        popup_->setWindowFlag(Qt::Tool);
+        // Enable click through the window to other apps
+        popup_->setWindowFlag(Qt::WindowTransparentForInput);
+        popup_->setWindowFlag(Qt::WindowDoesNotAcceptFocus);
+
+        // popup_->setAttribute(Qt::WA_TranslucentBackground);
+        // popup_->setAttribute(Qt::WA_NoSystemBackground);
+
+        // TODO(clovis): make setting for popup opacity
+        // Opacity
+        popup_->setWindowOpacity(0.9);  // 0 - transparent; 1 - opaque
+
+        // TODO(clovis): make setting for popup position and size
+        // Size
+        popup_->resize(800, 100);
+
+        // Position
+        QRect screen_geometry{
+            QApplication::primaryScreen()->availableGeometry()};
+
+        double x_ration{0.5};  // 0 - center left; 1 - center right
+        double y_ration{0.9};  // 0 - center up; 1 - center bottom
+
+        int x{static_cast<int>((screen_geometry.width() - popup_->width()) *
+                               x_ration)};
+        int y{static_cast<int>((screen_geometry.height() - popup_->height()) *
+                               y_ration)};
+
+        popup_->move(x, y);
+    }
+    popup_->show();
 }
 }  // namespace Altccents

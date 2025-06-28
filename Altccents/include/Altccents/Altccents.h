@@ -59,12 +59,16 @@ class AltccentsApp {
     bool saveCahche() const { return saveCache_; }
     void setSaveCache(bool val);
 
+    void updatePopup();
+
    private:
     AccentProfile activeAccentProfile_;
     QList<AccentProfile> loadedAccentProfiles_;
 
     QSystemTrayIcon* tray_{};
     QMenu* trayMenu_{};
+
+    QWidget* popup_{};
 
     bool programState_{};
 
