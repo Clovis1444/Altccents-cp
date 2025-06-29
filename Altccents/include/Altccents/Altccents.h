@@ -5,6 +5,7 @@
 #include <QString>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
+#include "Altccents/Popup.h"
 #include "Altccents/Settings.h"
 
 namespace Altccents {
@@ -32,10 +33,6 @@ class AltccentsApp {
 
     QChar nextAccent(const Qt::Key& key, bool is_capital);
 
-    void createTray();
-
-    int start(int argc, char** argv);
-
     void updateTrayIcon();
     void updateTrayMenu();
     void updateTrayToolTip();
@@ -59,7 +56,7 @@ class AltccentsApp {
     bool saveCahche() const { return saveCache_; }
     void setSaveCache(bool val);
 
-    void updatePopup();
+    void popup();
 
    private:
     AccentProfile activeAccentProfile_;
@@ -68,7 +65,7 @@ class AltccentsApp {
     QSystemTrayIcon* tray_{};
     QMenu* trayMenu_{};
 
-    QWidget* popup_{};
+    Popup* popup_{};
 
     bool programState_{};
 

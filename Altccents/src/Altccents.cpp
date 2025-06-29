@@ -7,10 +7,7 @@
 #include <QDir>
 #include <QFile>
 #include <QList>
-#include <QMainWindow>
 #include <QMenu>
-#include <QMessageBox>
-#include <QScreen>
 #include <QSystemTrayIcon>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
@@ -87,12 +84,36 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     return profiles;
 }
 
-AltccentsApp::AltccentsApp() {
+AltccentsApp::AltccentsApp()
+    : tray_{new QSystemTrayIcon{}},
+      trayMenu_{new QMenu{}},
+      popup_{new Popup{}} {
     // Without this line the program will close after closing message box
     QApplication::setQuitOnLastWindowClosed(false);
     // Accent Profiles MUST be loaded before config
     loadAccentProfiles();
     loadConfig();
+
+    //
+    // Tray
+    //
+    updateTrayIcon();
+
+    updateTrayMenu();
+    // On click
+    QObject::connect(tray_, &QSystemTrayIcon::activated,
+                     [&](QSystemTrayIcon::ActivationReason r) {
+                         // On single left click
+                         if (r == QSystemTrayIcon::Trigger) {
+                             programState_ = !programState_;
+                             updateTray();
+                         }
+                     });
+
+    // Tooltip
+    updateTrayToolTip();
+
+    tray_->show();
 }
 
 AltccentsApp::~AltccentsApp() {
@@ -219,40 +240,6 @@ QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
     return chars[0];
 }
 
-void AltccentsApp::createTray() {
-    if (!tray_) {
-        tray_ = new QSystemTrayIcon{};
-    }
-
-    updateTrayIcon();
-
-    updateTrayMenu();
-    // On click
-    QObject::connect(tray_, &QSystemTrayIcon::activated,
-                     [&](QSystemTrayIcon::ActivationReason r) {
-                         // On single left click
-                         if (r == QSystemTrayIcon::Trigger) {
-                             programState_ = !programState_;
-                             updateTray();
-                         }
-                     });
-
-    // Tooltip
-    updateTrayToolTip();
-
-    tray_->show();
-}
-
-int AltccentsApp::start(int argc, char** argv) {
-    QApplication a{argc, argv};
-
-    createTray();
-
-    updatePopup();
-
-    return QApplication::exec();
-}
-
 void AltccentsApp::updateTrayIcon() {
     if (!tray_) {
         return;
@@ -263,12 +250,8 @@ void AltccentsApp::updateTrayIcon() {
 }
 
 void AltccentsApp::updateTrayMenu() {
-    if (!tray_) {
+    if (!tray_ || !trayMenu_) {
         return;
-    }
-
-    if (!trayMenu_) {
-        trayMenu_ = new QMenu{};
     }
 
     static QAction* insert_profiles_at;
@@ -434,43 +417,5 @@ void AltccentsApp::setSaveCache(bool val) {
     updateTray();
 }
 
-void AltccentsApp::updatePopup() {
-    if (!popup_) {
-        popup_ = new QWidget{};
-
-        popup_->setWindowFlag(Qt::FramelessWindowHint);
-        popup_->setWindowFlag(Qt::WindowStaysOnTopHint);
-        // Make the window not appear in taskbar
-        popup_->setWindowFlag(Qt::Tool);
-        // Enable click through the window to other apps
-        popup_->setWindowFlag(Qt::WindowTransparentForInput);
-        popup_->setWindowFlag(Qt::WindowDoesNotAcceptFocus);
-
-        // popup_->setAttribute(Qt::WA_TranslucentBackground);
-        // popup_->setAttribute(Qt::WA_NoSystemBackground);
-
-        // TODO(clovis): make setting for popup opacity
-        // Opacity
-        popup_->setWindowOpacity(0.9);  // 0 - transparent; 1 - opaque
-
-        // TODO(clovis): make setting for popup position and size
-        // Size
-        popup_->resize(800, 100);
-
-        // Position
-        QRect screen_geometry{
-            QApplication::primaryScreen()->availableGeometry()};
-
-        double x_ration{0.5};  // 0 - center left; 1 - center right
-        double y_ration{0.9};  // 0 - center up; 1 - center bottom
-
-        int x{static_cast<int>((screen_geometry.width() - popup_->width()) *
-                               x_ration)};
-        int y{static_cast<int>((screen_geometry.height() - popup_->height()) *
-                               y_ration)};
-
-        popup_->move(x, y);
-    }
-    popup_->show();
-}
+void AltccentsApp::popup() { popup_->show({'s'}, 0); }
 }  // namespace Altccents

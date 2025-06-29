@@ -13,6 +13,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/Utils.h
 # Note: Use PRIVATE to use lib as private dep
 target_link_libraries(Altccents-linux PRIVATE
 Qt6::Core
+Qt6::Widgets
 Altccents
 ${LIBEVDEV_LIBRARIES}
 ${X11_LIBRARIES}
