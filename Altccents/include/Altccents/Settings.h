@@ -40,6 +40,10 @@ class Settings {
 
     // NOLINTNEXTLINE
     enum SettingsType {
+        kPopupX,
+        kPopupY,
+        kPopupOpacity,
+        kCharBoxSize,
         kActiveProfile,
         kProgramState,
         kSaveCache,
@@ -181,6 +185,14 @@ class Settings {
     // - def_val type MUST be defined in settings_
     // - key and def_val MUST not be changed
     inline static QHash<SettingsType, SettingEntry> settings_{
+        // [0..1]: 0 - center left; 1 - center right
+        {kPopupX, {.key{"Popup/popup_x"}, .def_val{0.5F}, .val{}}},
+        // [0..1]: 0 - center up; 1 - center bottom
+        {kPopupY, {.key{"Popup/popup_y"}, .def_val{0.9F}, .val{}}},
+        // [0..1]: 0 - transparent; 1 - opaque
+        {kPopupOpacity, {.key{"Popup/popup_opacity"}, .def_val{0.9F}, .val{}}},
+        {kCharBoxSize,
+         {.key{"Popup/char_box_size"}, .def_val{int{50}}, .val{}}},
         {kActiveProfile,
          {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
         {kProgramState, {.key{"Cache/program_state"}, .def_val{true}, .val{}}},

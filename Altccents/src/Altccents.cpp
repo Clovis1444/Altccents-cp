@@ -175,9 +175,12 @@ void AltccentsApp::loadConfig() {
                 setSaveCache(s_val);
                 break;
             }
-            case Settings::kEnumLength: {
+            case Settings::kPopupX:
+            case Settings::kPopupY:
+            case Settings::kPopupOpacity:
+            case Settings::kCharBoxSize:
+            case Settings::kEnumLength:
                 break;
-            }
         }
     }
 }
@@ -417,5 +420,5 @@ void AltccentsApp::setSaveCache(bool val) {
     updateTray();
 }
 
-void AltccentsApp::popup() { popup_->show({'s'}, 0); }
+void AltccentsApp::popup() { popup_->show({'s', '2', 'k', 'y'}, 2); }
 }  // namespace Altccents

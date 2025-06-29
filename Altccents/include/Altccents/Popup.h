@@ -16,5 +16,12 @@ class Popup : public QWidget {
 
    private:
     void paintEvent(QPaintEvent*) override;
+
+    struct CharCollection {
+        QList<QChar> chars;
+        unsigned int active_index;
+    };
+
+    CharCollection charCollection_;
 };
 }  // namespace Altccents
