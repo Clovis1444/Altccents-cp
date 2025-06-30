@@ -159,6 +159,7 @@ void AltccentsApp::loadConfig() {
     for (int i{}; i < static_cast<int>(Settings::kEnumLength); ++i) {
         Settings::SettingsType s{static_cast<Settings::SettingsType>(i)};
 
+        // Handle all settings needed for AltccentsApp here
         switch (s) {
             case Settings::kActiveProfile: {
                 QString s_val{Settings::get(s).toString()};
@@ -175,11 +176,7 @@ void AltccentsApp::loadConfig() {
                 setSaveCache(s_val);
                 break;
             }
-            case Settings::kPopupX:
-            case Settings::kPopupY:
-            case Settings::kPopupOpacity:
-            case Settings::kCharBoxSize:
-            case Settings::kEnumLength:
+            default:
                 break;
         }
     }
