@@ -35,15 +35,13 @@ void Popup::show(const QList<QChar>& chars, unsigned int active_index) {
     setWindowOpacity(
         qBound(0.0, Settings::get(Settings::kPopupOpacity).toDouble(), 1.0));
 
-    // TODO(clovis): create setting option for popup outline border
-    // TODO(clovis): create setting option for popup margin
-    // TODO(clovis): create setting option for char box margin
-    // Size
+    int margin{Settings::get(Settings::kPopupMargins).toInt()};
     int char_box_size{Settings::get(Settings::kCharBoxSize).toInt()};
     int border_width{Settings::get(Settings::kPopupBorderWidth).toInt()};
 
-    int w{static_cast<int>((char_box_size * chars.count()) + border_width)};
-    int h{char_box_size + border_width};
+    int w{static_cast<int>((char_box_size * chars.count()) + border_width +
+                           (margin * (chars.count() + 1)))};
+    int h{char_box_size + border_width + (margin * 2)};
     resize(w, h);
 
     // Position
@@ -65,6 +63,7 @@ void Popup::paintEvent(QPaintEvent*) {
     QPainter p{this};
     p.setRenderHint(QPainter::Antialiasing);
 
+    int margin{Settings::get(Settings::kPopupMargins).toInt()};
     int char_box_size{Settings::get(Settings::kCharBoxSize).toInt()};
     QColor background_color{
         Settings::get(Settings::kPopupBackgorundColor).value<QColor>()};
@@ -80,6 +79,16 @@ void Popup::paintEvent(QPaintEvent*) {
         Settings::get(Settings::kCharBoxBorderColor).value<QColor>()};
     QColor char_box_active_border_color{
         Settings::get(Settings::kCharBoxActiveBorderColor).value<QColor>()};
+    QColor text_color{Settings::get(Settings::kPopupFontColor).value<QColor>()};
+    QColor active_text_color{
+        Settings::get(Settings::kPopupActiveFontColor).value<QColor>()};
+    QString font_family{Settings::get(Settings::kPopupFontFamily).toString()};
+    int font_point_size{Settings::get(Settings::kPopupFontPointSize).toInt()};
+    int font_weight{Settings::get(Settings::kPopupFontWeight).toInt()};
+    bool font_italic{Settings::get(Settings::kPopupFontItalic).toBool()};
+
+    QFont font{font_family, font_point_size, font_weight, font_italic};
+    p.setFont(font);
 
     // Draw Popup box
     QPainterPath popup_box{};
@@ -101,32 +110,37 @@ void Popup::paintEvent(QPaintEvent*) {
     p.drawPath(popup_box);
     //
 
-    // TODO(clovis): add margins options
-    // TODO(clovis): add font, font size, font color options
-
     // Draw char boxes
     for (int i{}; i < charCollection_.chars.count(); ++i) {
         QPainterPath char_box{};
 
-        QRect char_box_rect{offset + (i * char_box_size), offset, char_box_size,
-                            char_box_size};
+        QRect char_box_rect{offset + (char_box_size * i) + (margin * (i + 1)),
+                            offset + margin, char_box_size, char_box_size};
 
         char_box.addRoundedRect(char_box_rect, rounding, rounding);
 
         QPen char_box_pen{};
+        QPen text_pen{};
         char_box_pen.setWidth(border_width);
 
         if (i == charCollection_.active_index) {
             p.setBrush(char_box_active_color);
             char_box_pen.setColor(char_box_active_border_color);
+            text_pen.setColor(active_text_color);
         } else {
             p.setBrush(char_box_color);
             char_box_pen.setColor(char_box_border_color);
+            text_pen.setColor(text_color);
         }
 
         p.setPen(char_box_pen);
-
+        // Draw char_box
         p.drawPath(char_box);
+
+        p.setPen(text_pen);
+        QTextOption text_options{Qt::AlignCenter};
+        // Draw text
+        p.drawText(char_box_rect, charCollection_.chars[i], text_options);
     }
 }
 }  // namespace Altccents

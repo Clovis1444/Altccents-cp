@@ -417,5 +417,5 @@ void AltccentsApp::setSaveCache(bool val) {
     updateTray();
 }
 
-void AltccentsApp::popup() { popup_->show({'s', '2', 'k', 'y'}, 2); }
+void AltccentsApp::popup() { popup_->show({'s', '2', 'k', 'K', 'y'}, 2); }
 }  // namespace Altccents
