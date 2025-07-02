@@ -11,7 +11,7 @@ cd "$SCRIPT_DIR" || exit 1
 BUILD_DIR="./build"
 TARGET="/Altccents-linux/Altccents-linux"
 RUN_TARGET=${BUILD_DIR}${TARGET}
-# USE_SUDO="sudo"
+USE_SUDO="sudo"
 
 SET_TARGET=""
 SET_BUILD_DIR=""

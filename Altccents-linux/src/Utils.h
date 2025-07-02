@@ -1,6 +1,8 @@
 #pragma once
 
 #include <X11/Xlib.h>
+#include <fcntl.h>
+#include <libevdev-1.0/libevdev/libevdev.h>
 
 #include <iostream>
 
@@ -69,5 +71,45 @@ inline void printKeyMapping(Display* d, KeyCode key) {
     }
     XFree(keysyms);
 }
+
+inline void readEvent() {
+    const std::string dev_path{"/dev/input/event2"};
+    int fd{open(dev_path.c_str(), O_RDONLY | O_NONBLOCK)};
+
+    libevdev* dev{};
+
+    int rc{libevdev_new_from_fd(fd, &dev)};
+
+    if (rc < 0) {
+        std::cout << "Failed to init libevdev" << std::endl;
+        return;
+    }
+
+    std::cout << "Device name: " << libevdev_get_name(dev) << std::endl;
+    std::cout << "Bustype: " << libevdev_get_id_bustype(dev) << std::endl;
+    std::cout << "Vendor: " << libevdev_get_id_vendor(dev) << std::endl;
+    std::cout << "Product: " << libevdev_get_id_product(dev) << std::endl;
+
+    while (true) {
+        input_event ev{};
+
+        rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
+
+        if (rc == 0) {
+            std::cout << "Type: " << libevdev_event_type_get_name(ev.type)
+                      << '|';
+            std::cout << "Code: "
+                      << libevdev_event_code_get_name(ev.type, ev.code) << '|';
+            std::cout << "Value: " << ev.value << '|';
+            std::cout << "Time: [" << ev.time.tv_sec << ", " << ev.time.tv_usec
+                      << ']' << std::endl;
+
+            if (ev.code == KEY_Q) {
+                return;
+            }
+        }
+    }
+}
+
 }  // namespace Utils
 }  // namespace Altccents
