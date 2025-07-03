@@ -3,6 +3,7 @@
 #include <X11/Xlib.h>
 #include <fcntl.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
+#include <unistd.h>
 
 #include <iostream>
 
@@ -74,7 +75,7 @@ inline void printKeyMapping(Display* d, KeyCode key) {
 
 inline void readEvent() {
     const std::string dev_path{"/dev/input/event2"};
-    int fd{open(dev_path.c_str(), O_RDONLY | O_NONBLOCK)};
+    int fd{open(dev_path.c_str(), O_RDWR | O_NONBLOCK)};
 
     libevdev* dev{};
 
@@ -106,6 +107,19 @@ inline void readEvent() {
 
             if (ev.code == KEY_Q) {
                 return;
+            }
+            if (ev.code == KEY_7 && ev.value == 1) {
+                //
+                input_event ie{};
+                ie.type = EV_KEY;
+                ie.code = KEY_S;
+                ie.value = 1;
+                ie.time = ev.time;
+                // Send key down
+                write(fd, &ie, sizeof(ie));
+                ie.value = 0;
+                // Send key up
+                write(fd, &ie, sizeof(ie));
             }
         }
     }
