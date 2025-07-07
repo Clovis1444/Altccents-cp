@@ -202,6 +202,24 @@ inline void xHook() {
 
                 qInfo() << "Keycode:" << e.xkey.keycode << key_sym << str;
 
+                // Get keycode from string
+                KeySym ks{XStringToKeysym("7")};
+                KeyCode kc{XKeysymToKeycode(display, ks)};
+                // Send fake keyboard event
+                if (e.xkey.keycode == kc) {
+                    XKeyEvent f_ev{e.xkey};
+                    // Get keycode for fake char
+                    // TODO(clovis): implement this layout agnostic(use xkb???)
+                    // Note: This methode depends on the current keyboard layout
+                    KeySym f_ks{XStringToKeysym("Cyrillic_EF")};
+                    KeyCode f_kc{XKeysymToKeycode(display, f_ks)};
+                    f_ev.keycode = f_kc;
+
+                    XSendEvent(display, focus_w, 1,
+                               KeyPressMask | KeyReleaseMask,
+                               reinterpret_cast<XEvent*>(&f_ev));
+                }
+
                 break;
             }
             default: {
