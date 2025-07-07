@@ -22,7 +22,9 @@ int main(int argc, char** argv) {
     // altccents.popup();
     // return QApplication::exec();
 
-    Altccents::Utils::readEvent();
+    // Altccents::Utils::readEvent();
+
+    Altccents::Utils::xHook();
 
     return 0;
 }

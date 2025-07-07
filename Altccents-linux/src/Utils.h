@@ -1,6 +1,12 @@
 #pragma once
 
+// XLib and Qt have some macro collission so XLib should be included after all
+// Qt headers
+// clang-format off
+#include <QDebug>
 #include <X11/Xlib.h>
+#include <X11/XKBlib.h>
+// clang-format on
 #include <fcntl.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
 #include <unistd.h>
@@ -106,8 +112,11 @@ inline void readEvent() {
                       << ']' << std::endl;
 
             if (ev.code == KEY_Q) {
+                libevdev_free(dev);
+                close(fd);
                 return;
             }
+            // On key 7 down - emulate keyboard input
             if (ev.code == KEY_7 && ev.value == 1) {
                 //
                 input_event ie{};
@@ -123,6 +132,85 @@ inline void readEvent() {
             }
         }
     }
+}
+
+// TODO(clovis): Does not works for all windows(Nemo, app launcher etc)
+inline void xHook() {
+    Display* display{XOpenDisplay(nullptr)};
+    if (!display) {
+        qCritical().noquote()
+            << "Altccents::Utils [ERROR]: failed to open XDisplay";
+        return;
+    }
+
+    Window root_w{DefaultRootWindow(display)};
+    Window focus_w{};
+    int revert{};
+
+    // Get focus window
+    XGetInputFocus(display, &focus_w, &revert);
+    {
+        char* name{};
+        XFetchName(display, focus_w, &name);
+        qInfo() << "Focus:" << focus_w << name;
+    }
+    // Event hook
+    XSelectInput(display, focus_w,
+                 KeyPressMask | KeyReleaseMask | FocusChangeMask);
+
+    while (true) {
+        XEvent e{};
+        XNextEvent(display, &e);
+
+        switch (e.type) {
+            case FocusOut: {
+                // If focus changed - stop receiving events from old focus
+                if (focus_w != root_w) {
+                    XSelectInput(display, focus_w, 0);
+                }
+                // Update focus window
+                XGetInputFocus(display, &focus_w, &revert);
+                {
+                    char* name{};
+                    XFetchName(display, focus_w, &name);
+                    qInfo() << "Focus:" << focus_w << name;
+                }
+
+                // Handle "focus-follows-mouse" mode
+                if (focus_w == PointerRoot) {
+                    focus_w = root_w;
+                }
+
+                // Start receiving events from new focus
+                XSelectInput(display, focus_w,
+                             KeyPressMask | KeyReleaseMask | FocusChangeMask);
+
+                break;
+            }
+            case KeyPress: {
+                XkbStateRec xkb_state{};
+                // Keyboard state
+                XkbGetState(display, XkbUseCoreKbd, &xkb_state);
+
+                // Keycode -> KeySym
+                KeySym key_sym{XkbKeycodeToKeysym(
+                    display, static_cast<KeyCode>(e.xkey.keycode),
+                    xkb_state.locked_group, xkb_state.group)};
+
+                // KeySym -> string
+                char* str{XKeysymToString(key_sym)};
+
+                qInfo() << "Keycode:" << e.xkey.keycode << key_sym << str;
+
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    XCloseDisplay(display);
 }
 
 }  // namespace Utils
