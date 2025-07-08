@@ -208,16 +208,38 @@ inline void xHook() {
                 // Send fake keyboard event
                 if (e.xkey.keycode == kc) {
                     XKeyEvent f_ev{e.xkey};
-                    // Get keycode for fake char
-                    // TODO(clovis): implement this layout agnostic(use xkb???)
-                    // Note: This methode depends on the current keyboard layout
-                    KeySym f_ks{XStringToKeysym("Cyrillic_EF")};
-                    KeyCode f_kc{XKeysymToKeycode(display, f_ks)};
-                    f_ev.keycode = f_kc;
 
+                    KeyCode kc_to_map{34};
+
+                    // Get old mapping for the key
+                    int keysyms_per{};
+                    KeySym* old_mapping{XGetKeyboardMapping(display, kc_to_map,
+                                                            1, &keysyms_per)};
+                    {
+                        for (int i{}; i < keysyms_per; ++i) {
+                            qInfo()
+                                << i << ':' << XKeysymToString(old_mapping[i]);
+                        }
+                    }
+
+                    // Remap key to desired char
+                    KeySym new_mapping{0x07cf};
+                    XChangeKeyboardMapping(display, kc_to_map, 1, &new_mapping,
+                                           1);
+
+                    // Send fake key event
+                    f_ev.keycode = kc_to_map;
                     XSendEvent(display, focus_w, 1,
                                KeyPressMask | KeyReleaseMask,
                                reinterpret_cast<XEvent*>(&f_ev));
+
+                    // Map key back to its old mapping
+                    XChangeKeyboardMapping(display, kc_to_map, keysyms_per,
+                                           old_mapping, 1);
+
+                    XFree(old_mapping);
+
+                    XFlush(display);
                 }
 
                 break;
