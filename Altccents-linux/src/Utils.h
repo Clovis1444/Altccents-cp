@@ -223,7 +223,10 @@ inline void xHook() {
                     }
 
                     // Remap key to desired char
-                    KeySym new_mapping{0x07cf};
+                    KeySym new_mapping{XStringToKeysym("U03C3")};
+                    // Or
+                    // KeySym new_mapping{XStringToKeysym("0x10003C3")};
+
                     XChangeKeyboardMapping(display, kc_to_map, 1, &new_mapping,
                                            1);
 
