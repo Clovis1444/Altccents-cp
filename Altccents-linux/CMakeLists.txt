@@ -6,9 +6,14 @@ pkg_check_modules(LIBEVDEV REQUIRED libevdev)
 find_package(X11 REQUIRED)
 
 qt_add_executable(Altccents-linux 
+${CMAKE_CURRENT_SOURCE_DIR}/include/Altccents/X11.h
+${CMAKE_CURRENT_SOURCE_DIR}/src/X11.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/Utils.h
 )
+
+
+target_include_directories(Altccents-linux PRIVATE include)
 
 # Note: Use PRIVATE to use lib as private dep
 target_link_libraries(Altccents-linux PRIVATE

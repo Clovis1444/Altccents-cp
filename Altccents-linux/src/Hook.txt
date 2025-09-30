@@ -1,0 +1,8 @@
+Working pass-through (key)hook:
+    Setup grab:
+    XGrabKey(d, 56, AnyModifier, w, 1, GrabModeAsync, GrabModeSync);
+
+    Send event:
+    XAllowEvents(d, ReplayKeyboard, CurrentTime);
+    Ignore event:
+    XAllowEvents(d, AsyncKeyboard, CurrentTime);

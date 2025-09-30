@@ -1,6 +1,7 @@
 #include <QApplication>
 
 #include "Altccents/Altccents.h"
+#include "Altccents/X11.h"
 #include "Utils.h"
 
 int main(int argc, char** argv) {
@@ -24,7 +25,12 @@ int main(int argc, char** argv) {
 
     // Altccents::Utils::readEvent();
 
-    Altccents::Utils::xHook();
+    // Altccents::Utils::xHook();
+
+    bool hook_result{Altccents::X11::hook()};
+    if (!hook_result) {
+        return 1;
+    }
 
     return 0;
 }
