@@ -21,8 +21,6 @@ class Key {
 
         keycode_ = keycode;
     }
-    constexpr explicit Key(const qint64& keycode)
-        : Key{static_cast<int>(keycode)} {}
 
     bool operator==(const Key& other) const {
         return keycode_ == other.keycode_;

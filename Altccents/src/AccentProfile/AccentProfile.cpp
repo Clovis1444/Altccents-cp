@@ -44,11 +44,24 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
         QJsonObject obj{i.toObject()};
 
         // Key
-        qint64 keycode{obj[kJsonKeyKey].toInteger(-1)};
+        // First, try to read value as int
+        int keycode{obj[kJsonKeyKey].toInt(-1)};
         if (keycode == -1) {
-            QString error{"Failed to find \"%1\" key in JsonObject"};
-            warning(error.arg(kJsonKeyKey));
-            continue;
+            // Second, try to read value from String
+            bool ok{};
+            // Trying conversion in the following order:
+            // hex(0x...) -> binary(ob...) -> octal(0...) -> decimal
+            int kc = obj[kJsonKeyKey].toString().toInt(&ok, 0);
+            if (ok) {
+                keycode = kc;
+            }
+
+            // If all conversions failed - continue
+            if (keycode == -1) {
+                QString error{"Failed to find \"%1\" key in JsonObject"};
+                warning(error.arg(kJsonKeyKey));
+                continue;
+            }
         }
         Key key{keycode};
         // If keycode is out of bounds
