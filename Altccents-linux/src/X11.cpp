@@ -7,7 +7,17 @@
 #include <X11/Xlib.h>
 // clang-format on
 
-bool Altccents::X11::hook() {
+bool Altccents::X11::hook(const AccentProfile& ap) {
+    // const QList<Qt::Key> keys{ap.accents().keys()};
+    //
+    // qInfo() << static_cast<int>(Qt::Key_NumLock);
+    // if (!keys.length()) {
+    //     return true;
+    // }
+    //
+    // qInfo() << "Keys[" << keys.length() << "]:" << keys;
+    // return false;
+    //
     Display* d{XOpenDisplay(nullptr)};
 
     if (!d) {
