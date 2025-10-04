@@ -212,7 +212,7 @@ void AltccentsApp::setActiveProfile() {
     updateTray();
 }
 
-QChar AltccentsApp::nextAccent(const Qt::Key& key, bool is_capital) {
+QChar AltccentsApp::nextAccent(const Key& key, bool is_capital) {
     // If there is no key in the profile - return
     if (!activeAccentProfile_.contains(key)) {
         lastAccent_ = {};

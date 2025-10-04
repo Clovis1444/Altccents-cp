@@ -44,9 +44,17 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
         QJsonObject obj{i.toObject()};
 
         // Key
-        qint64 key{obj[kJsonKeyKey].toInteger()};
-        if (key == 0) {
+        qint64 keycode{obj[kJsonKeyKey].toInteger(-1)};
+        if (keycode == -1) {
             QString error{"Failed to find \"%1\" key in JsonObject"};
+            warning(error.arg(kJsonKeyKey));
+            continue;
+        }
+        Key key{keycode};
+        // If keycode is out of bounds
+        if (key.kc() == -1) {
+            QString error{
+                "Wrong key: \"%1\". Key value must be in [0..255] range"};
             warning(error.arg(kJsonKeyKey));
             continue;
         }
@@ -66,7 +74,7 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
         }
 
         // Insert accents
-        accents_.insert(static_cast<Qt::Key>(key), {lower_list, upper_list});
+        accents_.insert(key, {lower_list, upper_list});
     }
 };
 
@@ -130,7 +138,7 @@ QJsonDocument AccentProfile::toQJsonDocument() const {
     for (const auto& i : accents_) {
         QJsonObject obj{};
 
-        obj[kJsonKeyKey] = accents_.key(i);
+        obj[kJsonKeyKey] = accents_.key(i).kc();
 
         QJsonArray lower{};
         for (const QChar& j : i.first) {

@@ -10,6 +10,42 @@
 #include <qstringview.h>
 
 namespace Altccents {
+class Key {
+   public:
+    constexpr Key() : keycode_{-1} {}
+    constexpr explicit Key(const int& keycode) {
+        if (keycode < 0 || keycode > 255) {
+            keycode_ = -1;
+            return;
+        }
+
+        keycode_ = keycode;
+    }
+    constexpr explicit Key(const qint64& keycode)
+        : Key{static_cast<int>(keycode)} {}
+
+    bool operator==(const Key& other) const {
+        return keycode_ == other.keycode_;
+    }
+
+    // Returns -1 if an object is invalid
+    int kc() const {
+        if (keycode_ < 0 || keycode_ > 255) {
+            return -1;
+        }
+        return keycode_;
+    }
+
+   private:
+    int keycode_{};
+};
+constexpr size_t qHash(const Key& key, size_t = 0) {
+    return static_cast<size_t>(key.kc());
+}
+constexpr QDebug& operator<<(QDebug& q_debug, const Key& key) {
+    return q_debug.noquote() << QString{"Key{%1}"}.arg(key.kc());
+}
+
 class AccentProfile {
    public:
     AccentProfile(const QByteArray& data, const QFileInfo& fileInfo);
@@ -26,7 +62,7 @@ class AccentProfile {
         QJsonDocument::JsonFormat format = QJsonDocument::Indented);
 
     QFileInfo fileInfo() const { return fileInfo_; }
-    QHash<Qt::Key, QPair<QList<QChar>, QList<QChar>>> accents() const {
+    QHash<Key, QPair<QList<QChar>, QList<QChar>>> accents() const {
         return accents_;
     };
     QString filePath() const { return fileInfo_.absoluteFilePath(); }
@@ -38,8 +74,8 @@ class AccentProfile {
     void print(const QJsonDocument::JsonFormat& format =
                    QJsonDocument::Indented) const;
 
-    bool contains(Qt::Key key) const { return accents_.contains(key); };
-    QList<QChar> chars(Qt::Key key, bool is_capital) const {
+    bool contains(Key key) const { return accents_.contains(key); };
+    QList<QChar> chars(Key key, bool is_capital) const {
         return is_capital ? accents_[key].second : accents_[key].first;
     };
 
@@ -68,8 +104,8 @@ class AccentProfile {
             .arg(kJsonLowerKey)
             .arg(kJsonUpperKey)};
 
-    // QHas<Key QPair<lower, upper>>
-    QHash<Qt::Key, QPair<QList<QChar>, QList<QChar>>> accents_;
+    // QHash<Key QPair<lower, upper>>
+    QHash<Key, QPair<QList<QChar>, QList<QChar>>> accents_;
     QFileInfo fileInfo_;
 };
 };  // namespace Altccents

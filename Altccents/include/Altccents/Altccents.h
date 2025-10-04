@@ -31,7 +31,7 @@ class AltccentsApp {
     void setActiveProfile(const QString& profile);
     void setActiveProfile();
 
-    QChar nextAccent(const Qt::Key& key, bool is_capital);
+    QChar nextAccent(const Key& key, bool is_capital);
 
     void updateTrayIcon();
     void updateTrayMenu();
@@ -72,7 +72,7 @@ class AltccentsApp {
     bool saveCache_{true};
 
     struct AccentInput {
-        Qt::Key key;
+        Key key;
         bool is_capital;
         int index;
     };

@@ -8,9 +8,8 @@
 // clang-format on
 
 bool Altccents::X11::hook(const AccentProfile& ap) {
-    // const QList<Qt::Key> keys{ap.accents().keys()};
+    // const QList<Key> keys{ap.accents().keys()};
     //
-    // qInfo() << static_cast<int>(Qt::Key_NumLock);
     // if (!keys.length()) {
     //     return true;
     // }
