@@ -122,6 +122,8 @@ AltccentsApp::~AltccentsApp() {
     delete popup_;
 
     writeCacheToFile();
+
+    QObject::~QObject();
 };
 
 bool AltccentsApp::loadAccentProfiles(const QString& dir) {
@@ -192,6 +194,7 @@ AccentProfile AltccentsApp::activeProfile() const {
 void AltccentsApp::setActiveProfile(const AccentProfile& profile) {
     if (loadedAccentProfiles_.contains(profile)) {
         activeAccentProfile_ = profile;
+        emit activeProfileChanged();
     }
 
     updateTray();
@@ -201,6 +204,7 @@ void AltccentsApp::setActiveProfile(const QString& profile) {
     for (const AccentProfile& i : loadedAccentProfiles_) {
         if (i.name() == profile || i.filePath() == profile) {
             setActiveProfile(i);
+            emit activeProfileChanged();
             return;
         }
     }
@@ -210,6 +214,8 @@ void AltccentsApp::setActiveProfile() {
     activeAccentProfile_ = {};
 
     updateTray();
+
+    emit activeProfileChanged();
 }
 
 QChar AltccentsApp::nextAccent(const Key& key, bool is_capital) {

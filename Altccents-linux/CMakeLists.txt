@@ -8,6 +8,8 @@ find_package(X11 REQUIRED)
 qt_add_executable(Altccents-linux 
 ${CMAKE_CURRENT_SOURCE_DIR}/include/Altccents/X11.h
 ${CMAKE_CURRENT_SOURCE_DIR}/src/X11.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/include/Altccents/HookManager.h
+${CMAKE_CURRENT_SOURCE_DIR}/src/HookManager.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/Utils.h
 )

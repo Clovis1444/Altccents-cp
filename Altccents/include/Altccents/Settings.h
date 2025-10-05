@@ -62,6 +62,7 @@ class Settings {
         kActiveProfile,
         kProgramState,
         kSaveCache,
+        kControlKey,
         // Insert new members here
         kEnumLength
     };
@@ -253,6 +254,7 @@ class Settings {
          {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
         {kProgramState, {.key{"Cache/program_state"}, .def_val{true}, .val{}}},
         {kSaveCache, {.key{"Cache/save_cache"}, .def_val{true}, .val{}}},
+        {kControlKey, {.key{"General/control_key"}, .def_val{77}, .val{}}},
         //
     };
 };

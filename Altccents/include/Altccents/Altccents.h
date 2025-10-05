@@ -1,5 +1,6 @@
 #pragma once
 #include <QtWidgets/qsystemtrayicon.h>
+#include <qtmetamacros.h>
 
 #include <QList>
 #include <QString>
@@ -11,10 +12,12 @@
 namespace Altccents {
 QList<AccentProfile> readAccentProfiles(const QString& dir);
 
-class AltccentsApp {
+class AltccentsApp : public QObject {
+    Q_OBJECT
+
    public:
     AltccentsApp();
-    ~AltccentsApp();
+    ~AltccentsApp() override;
 
     bool loadAccentProfiles(const QString& dir = Settings::kAccentProfileDir);
 
@@ -57,6 +60,9 @@ class AltccentsApp {
     void setSaveCache(bool val);
 
     void popup();
+
+   signals:
+    void activeProfileChanged();
 
    private:
     AccentProfile activeAccentProfile_;

@@ -7,7 +7,7 @@
 int main(int argc, char** argv) {
     QApplication a{argc, argv};
 
-    Altccents::AltccentsApp altccents{};
+    Altccents::AltccentsApp* altccents{new Altccents::AltccentsApp{}};
     //
     // qInfo() << QString{altccents.nextAccent(Altccents::Key{69}, true)};
     // qInfo() << QString{altccents.nextAccent(Altccents::Key{69}, true)};
@@ -26,10 +26,13 @@ int main(int argc, char** argv) {
 
     // Altccents::Utils::xHook();
 
-    bool hook_result{Altccents::X11::hook(altccents.activeProfile())};
-    if (!hook_result) {
-        return 1;
-    }
+    // bool hook_result{
+    //     Altccents::X11::hook(altccents.activeProfile(), altccents)};
+    // if (!hook_result) {
+    //     return 1;
+    // }
+
+    Altccents::X11::init(altccents);
 
     return QApplication::exec();
 
