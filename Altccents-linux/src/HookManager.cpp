@@ -16,7 +16,8 @@ HookThread::HookThread(QObject* parent) : QThread{parent} {
     }
 }
 HookThread::~HookThread() {
-    XUngrabKey(d_, AnyKey, AnyModifier, XDefaultRootWindow(d_));
+    stop();
+
     XCloseDisplay(d_);
 
     QThread::~QThread();
@@ -27,6 +28,17 @@ void HookThread::setAccentProfile(const AccentProfile& ap) {
     updateHook();
 }
 
+void HookThread::stop() {
+    XUngrabKey(d_, AnyKey, AnyModifier, XDefaultRootWindow(d_));
+    // Flush is important here. It prevents deadlock
+    XFlush(d_);
+
+    requestInterruption();
+    wait();
+
+    qInfo().noquote() << "Altccents::HookThread [INFO]: hook was stopped";
+}
+
 void HookThread::run() {
     updateHook();
 
@@ -34,7 +46,13 @@ void HookThread::run() {
     /////////////////////////////[HOOK LOOP]///////////////////////////////
     ///////////////////////////////////////////////////////////////////////
     XEvent e{};
-    while (true) {
+    while (!isInterruptionRequested()) {
+        // If there is no events in event queue - continue
+        if (!XPending(d_)) {
+            msleep(10);
+            continue;
+        }
+
         XNextEvent(d_, &e);
 
         qInfo() << "Event: " << e.xkey.type << e.xkey.keycode;
@@ -49,8 +67,9 @@ void HookThread::run() {
 
         XAllowEvents(d_, ReplayKeyboard, CurrentTime);
     }
-
-    qInfo() << "Loop end";
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////[HOOK LOOP END]/////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
 }
 
 void HookThread::updateHook() {
@@ -69,10 +88,6 @@ void HookThread::updateHook() {
                 << "Altccents::HookThread [ERROR]: failed to grab key";
         }
     }
-
-    // Without XFlush() hook event loop will not be updated and will be
-    // listening for old keys
-    XFlush(d_);
 }
 
 HookManager::HookManager(AltccentsApp* parent)

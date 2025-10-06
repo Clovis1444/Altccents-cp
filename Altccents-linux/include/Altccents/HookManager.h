@@ -15,6 +15,8 @@ class HookThread : public QThread {
 
     void setAccentProfile(const AccentProfile& ap);
 
+    void stop();
+
    signals:
     void popupShouldOpen(Key);
 
