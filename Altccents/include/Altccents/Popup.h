@@ -16,6 +16,7 @@ class Popup : public QWidget {
 
    private:
     void paintEvent(QPaintEvent*) override;
+    void keyPressEvent(QKeyEvent* e) override;
 
     struct CharCollection {
         QList<QChar> chars;

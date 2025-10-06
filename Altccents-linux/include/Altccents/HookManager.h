@@ -17,6 +17,9 @@ class HookThread : public QThread {
         QThread::~QThread();
     }
 
+   signals:
+    void popupShouldOpen(Key);
+
    private:
     void run() override;
     void stopHook();
@@ -47,6 +50,7 @@ class HookManager : public QObject {
 
    public slots:
     void onProfileChange();
+    void openPopup(Key key);
 
    private:
     HookThread* hook_;

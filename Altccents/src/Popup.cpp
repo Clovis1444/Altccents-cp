@@ -3,6 +3,7 @@
 #include <qminmax.h>
 
 #include <QApplication>
+#include <QKeyEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QScreen>
@@ -15,10 +16,10 @@ Popup::Popup(QWidget* parent) : QWidget{parent} {
     setWindowFlag(Qt::FramelessWindowHint);
     setWindowFlag(Qt::WindowStaysOnTopHint);
     // Make the window not appear in taskbar
-    setWindowFlag(Qt::Tool);
+    setWindowFlag(Qt::Popup);
     // Enable click through the window to other apps
     setWindowFlag(Qt::WindowTransparentForInput);
-    setWindowFlag(Qt::WindowDoesNotAcceptFocus);
+    // setWindowFlag(Qt::WindowDoesNotAcceptFocus);
 
     setAttribute(Qt::WA_TranslucentBackground);
     // setAttribute(Qt::WA_NoSystemBackground);
@@ -142,5 +143,13 @@ void Popup::paintEvent(QPaintEvent*) {
         // Draw text
         p.drawText(char_box_rect, charCollection_.chars[i], text_options);
     }
+}
+
+void Popup::keyPressEvent(QKeyEvent* e) {
+    qInfo() << "[POPUP]: " << e->text();
+
+    // TODO(clovis): implement popup logic here
+
+    QWidget::keyPressEvent(e);
 }
 }  // namespace Altccents

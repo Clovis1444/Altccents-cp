@@ -47,6 +47,7 @@ void HookThread::run() {
         qInfo() << "Event: " << e.xkey.type << e.xkey.keycode;
 
         // TODO(clovis): emit "open popup" signal here
+        emit popupShouldOpen(Key{static_cast<int>(e.xkey.keycode)});
 
         // Discard
         // XAllowEvents(d, AsyncKeyboard, CurrentTime);
@@ -65,10 +66,10 @@ void HookThread::stopHook() {
 }
 
 void HookManager::onProfileChange() {
-    if (hook_ != nullptr && hook_->isRunning()) {
-        // TODO(clovis): properly implement thread quit here
-        hook_->quit();
-    }
+    // if (hook_ != nullptr) {
+    //     // hook_->quit();
+    //     // hook_->wait();
+    // }
     delete hook_;
 
     if (parent_ != nullptr) {
@@ -80,8 +81,17 @@ void HookManager::onProfileChange() {
         qInfo() << ap.name();
         hook_ = new HookThread{parent_, ap};
 
+        QObject::connect(hook_, &HookThread::popupShouldOpen, this,
+                         &HookManager::openPopup);
+
         // Start hook loop
         hook_->start();
     }
+}
+
+void HookManager::openPopup(Key key) {
+    qInfo() << "Key param:" << key.kc();
+
+    parent_->popup();
 }
 }  // namespace Altccents
