@@ -10,21 +10,19 @@ class HookThread : public QThread {
     Q_OBJECT
 
    public:
-    HookThread(AltccentsApp* parent, AccentProfile ap)
-        : QThread{parent}, ap_{std::move(ap)} {}
-    ~HookThread() override {
-        stopHook();
-        QThread::~QThread();
-    }
+    explicit HookThread(QObject* parent);
+    ~HookThread() override;
+
+    void setAccentProfile(const AccentProfile& ap);
 
    signals:
     void popupShouldOpen(Key);
 
    private:
     void run() override;
-    void stopHook();
+    void updateHook();
 
-    const AccentProfile ap_;
+    AccentProfile ap_;
     Display* d_{};
 };
 
@@ -32,21 +30,7 @@ class HookManager : public QObject {
     Q_OBJECT
 
    public:
-    explicit HookManager(AltccentsApp* parent)
-        : QObject{parent}, parent_{parent} {
-        if (parent == nullptr) {
-            qCritical().noquote()
-                << "Altccents::HookManager [ERROR]: failed to init "
-                   "HookManager. AltccentsApp == nullptr";
-            return;
-        }
-
-        QObject::connect(parent, &AltccentsApp::activeProfileChanged, this,
-                         &HookManager::onProfileChange);
-
-        // First hook setup
-        onProfileChange();
-    }
+    explicit HookManager(AltccentsApp* parent);
 
    public slots:
     void onProfileChange();

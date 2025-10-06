@@ -6,14 +6,7 @@
 // clang-format on
 
 namespace Altccents {
-void HookThread::run() {
-    // If profile is empty - do not install hook
-    if (ap_.isEmpty()) {
-        return;
-    }
-
-    const QList<Key> keys{ap_.accents().keys()};
-
+HookThread::HookThread(QObject* parent) : QThread{parent} {
     d_ = XOpenDisplay(nullptr);
 
     if (!d_) {
@@ -21,21 +14,21 @@ void HookThread::run() {
             << "Altccents::HookThread [ERROR]: failed to open XDisplay";
         return;
     }
+}
+HookThread::~HookThread() {
+    XUngrabKey(d_, AnyKey, AnyModifier, XDefaultRootWindow(d_));
+    XCloseDisplay(d_);
 
-    Window root_w{XDefaultRootWindow(d_)};
+    QThread::~QThread();
+}
 
-    for (const auto& i : keys) {
-        int grab_result{XGrabKey(d_, i.kc(), AnyModifier, root_w, 1,
-                                 GrabModeAsync, GrabModeSync)};
-        if (!grab_result) {
-            qCritical().noquote()
-                << "Altccents::HookThread [ERROR]: failed to grab key";
+void HookThread::setAccentProfile(const AccentProfile& ap) {
+    ap_ = ap;
+    updateHook();
+}
 
-            stopHook();
-
-            return;
-        }
-    }
+void HookThread::run() {
+    updateHook();
 
     ///////////////////////////////////////////////////////////////////////
     /////////////////////////////[HOOK LOOP]///////////////////////////////
@@ -46,7 +39,7 @@ void HookThread::run() {
 
         qInfo() << "Event: " << e.xkey.type << e.xkey.keycode;
 
-        // TODO(clovis): emit "open popup" signal here
+        // TODO(clovis): implement logic when to open popup here
         emit popupShouldOpen(Key{static_cast<int>(e.xkey.keycode)});
 
         // Discard
@@ -60,33 +53,47 @@ void HookThread::run() {
     qInfo() << "Loop end";
 }
 
-void HookThread::stopHook() {
+void HookThread::updateHook() {
+    // Ungrab all grabbed keys
     XUngrabKey(d_, AnyKey, AnyModifier, XDefaultRootWindow(d_));
-    XCloseDisplay(d_);
+
+    const QList<Key> keys{ap_.accents().keys()};
+
+    // Grab keys
+    for (const auto& i : keys) {
+        int grab_result{XGrabKey(d_, i.kc(), AnyModifier,
+                                 XDefaultRootWindow(d_), 1, GrabModeAsync,
+                                 GrabModeSync)};
+        if (!grab_result) {
+            qCritical().noquote()
+                << "Altccents::HookThread [ERROR]: failed to grab key";
+        }
+    }
+
+    // Without XFlush() hook event loop will not be updated and will be
+    // listening for old keys
+    XFlush(d_);
+}
+
+HookManager::HookManager(AltccentsApp* parent)
+    : QObject{parent}, hook_{new HookThread{this}}, parent_{parent} {
+    if (parent == nullptr) {
+        qCritical().noquote()
+            << "Altccents::HookManager [ERROR]: failed to init "
+               "HookManager. AltccentsApp == nullptr";
+        return;
+    }
+
+    QObject::connect(parent, &AltccentsApp::activeProfileChanged, this,
+                     &HookManager::onProfileChange);
+    QObject::connect(hook_, &HookThread::popupShouldOpen, this,
+                     &HookManager::openPopup);
+    hook_->setAccentProfile(parent_->activeProfile());
+    hook_->start();
 }
 
 void HookManager::onProfileChange() {
-    // if (hook_ != nullptr) {
-    //     // hook_->quit();
-    //     // hook_->wait();
-    // }
-    delete hook_;
-
-    if (parent_ != nullptr) {
-        AccentProfile ap{parent_->activeProfile()};
-        if (ap.isEmpty()) {
-            return;
-        }
-
-        qInfo() << ap.name();
-        hook_ = new HookThread{parent_, ap};
-
-        QObject::connect(hook_, &HookThread::popupShouldOpen, this,
-                         &HookManager::openPopup);
-
-        // Start hook loop
-        hook_->start();
-    }
+    hook_->setAccentProfile(parent_->activeProfile());
 }
 
 void HookManager::openPopup(Key key) {
