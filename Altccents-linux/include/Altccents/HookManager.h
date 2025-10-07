@@ -36,6 +36,7 @@ class HookManager : public QObject {
 
    public slots:
     void onProfileChange();
+    void onProgramStateChanged(bool new_state);
     void openPopup(Key key);
 
    private:

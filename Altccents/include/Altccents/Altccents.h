@@ -63,6 +63,7 @@ class AltccentsApp : public QObject {
 
    signals:
     void activeProfileChanged();
+    void programStateChanged(bool);
 
    private:
     AccentProfile activeAccentProfile_;

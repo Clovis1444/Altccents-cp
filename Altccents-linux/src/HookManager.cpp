@@ -40,11 +40,17 @@ void HookThread::stop() {
 }
 
 void HookThread::run() {
+    // Do nothing if there is no keys to grab
+    if (ap_.accents().keys().count() == 0) {
+        return;
+    }
+
     updateHook();
 
     ///////////////////////////////////////////////////////////////////////
     /////////////////////////////[HOOK LOOP]///////////////////////////////
     ///////////////////////////////////////////////////////////////////////
+    qInfo().noquote() << "Altccents::HookThread [INFO]: hook was started";
     XEvent e{};
     while (!isInterruptionRequested()) {
         // If there is no events in event queue - continue
@@ -103,12 +109,23 @@ HookManager::HookManager(AltccentsApp* parent)
                      &HookManager::onProfileChange);
     QObject::connect(hook_, &HookThread::popupShouldOpen, this,
                      &HookManager::openPopup);
+    QObject::connect(parent, &AltccentsApp::programStateChanged, this,
+                     &HookManager::onProgramStateChanged);
+
     hook_->setAccentProfile(parent_->activeProfile());
     hook_->start();
 }
 
 void HookManager::onProfileChange() {
     hook_->setAccentProfile(parent_->activeProfile());
+}
+
+void HookManager::onProgramStateChanged(bool new_state) {
+    if (hook_ == nullptr) {
+        return;
+    }
+
+    new_state ? hook_->start() : hook_->stop();
 }
 
 void HookManager::openPopup(Key key) {

@@ -105,7 +105,7 @@ AltccentsApp::AltccentsApp()
                      [&](QSystemTrayIcon::ActivationReason r) {
                          // On single left click
                          if (r == QSystemTrayIcon::Trigger) {
-                             programState_ = !programState_;
+                             toggleProgramState();
                              updateTray();
                          }
                      });
@@ -393,12 +393,17 @@ void AltccentsApp::updateTray(AltccentsApp::updateTrayFlag flags) {
 }
 
 void AltccentsApp::setProgramState(bool state) {
+    if (programState_ == state) {
+        return;
+    }
+
     programState_ = state;
     updateTray();
+
+    emit programStateChanged(state);
 }
 bool AltccentsApp::toggleProgramState() {
-    programState_ = !programState_;
-    updateTray();
+    setProgramState(!programState());
     return programState_;
 }
 
