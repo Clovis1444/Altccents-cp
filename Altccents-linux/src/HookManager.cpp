@@ -45,7 +45,9 @@ void HookThread::run() {
         return;
     }
 
-    updateHook();
+    if (!updateHook()) {
+        return;
+    }
 
     ///////////////////////////////////////////////////////////////////////
     /////////////////////////////[HOOK LOOP]///////////////////////////////
@@ -83,13 +85,14 @@ void HookThread::run() {
     ///////////////////////////////////////////////////////////////////////
 }
 
-void HookThread::updateHook() {
+bool HookThread::updateHook() {
     // Ungrab all grabbed keys
     XUngrabKey(d_, AnyKey, AnyModifier, XDefaultRootWindow(d_));
 
     const QList<Key> keys{ap_.accents().keys()};
 
     // Grab keys
+    // NOLINTNEXTLINE
     for (const auto& i : keys) {
         int grab_result{XGrabKey(d_, i.kc(), AnyModifier,
                                  XDefaultRootWindow(d_), 1, GrabModeAsync,
@@ -97,8 +100,11 @@ void HookThread::updateHook() {
         if (!grab_result) {
             qCritical().noquote()
                 << "Altccents::HookThread [ERROR]: failed to grab key";
+            return false;
         }
     }
+
+    return true;
 }
 
 bool HookThread::isControlKeyDown() {

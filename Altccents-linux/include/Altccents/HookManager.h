@@ -22,7 +22,8 @@ class HookThread : public QThread {
 
    private:
     void run() override;
-    void updateHook();
+    // Returns false if hook was not installed, return true otherwise
+    bool updateHook();
 
     bool isControlKeyDown();
 
