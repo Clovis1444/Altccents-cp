@@ -60,6 +60,7 @@ class AltccentsApp : public QObject {
     void setSaveCache(bool val);
 
     void popup();
+    WId popupWId() const { return popup_ ? popup_->winId() : 0; }
 
    signals:
     void activeProfileChanged();

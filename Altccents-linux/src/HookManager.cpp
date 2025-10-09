@@ -63,14 +63,19 @@ void HookThread::run() {
 
         qInfo() << "Event: " << e.xkey.type << e.xkey.keycode;
 
-        // TODO(clovis): implement logic when to open popup here
-        emit popupShouldOpen(Key{static_cast<int>(e.xkey.keycode)});
+        if (isControlKeyDown()) {
+            // TODO(clovis): open popup here
+
+            // emit popupShouldOpen(Key{static_cast<int>(e.xkey.keycode)});
+            // continue;
+        }
 
         // Discard
-        // XAllowEvents(d, AsyncKeyboard, CurrentTime);
+        // XAllowEvents(d_, AsyncKeyboard, CurrentTime);
         // Proceed
-        // XAllowEvents(d, ReplayKeyboard, CurrentTime);
+        // XAllowEvents(d_, ReplayKeyboard, CurrentTime);
 
+        // Proceed key event
         XAllowEvents(d_, ReplayKeyboard, CurrentTime);
     }
     ///////////////////////////////////////////////////////////////////////
@@ -94,6 +99,24 @@ void HookThread::updateHook() {
                 << "Altccents::HookThread [ERROR]: failed to grab key";
         }
     }
+}
+
+bool HookThread::isControlKeyDown() {
+    int control_key{Settings::get(Settings::kControlKey).toInt()};
+
+    // If control_key is out of bounds
+    if (control_key < 0 || control_key >= 256) {
+        return false;
+    }
+
+    // Each bit represent each key. 32 * 8bits(256bits) == 256 keys
+    char keys[32]{};
+    XQueryKeymap(d_, keys);
+
+    bool control_key_down{
+        static_cast<bool>(keys[control_key / 8] & (1 << control_key % 8))};
+
+    return control_key_down;
 }
 
 HookManager::HookManager(AltccentsApp* parent)

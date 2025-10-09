@@ -24,6 +24,8 @@ class HookThread : public QThread {
     void run() override;
     void updateHook();
 
+    bool isControlKeyDown();
+
     AccentProfile ap_;
     Display* d_{};
 };
