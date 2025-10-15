@@ -1,6 +1,5 @@
 #include "Altccents/HookManager.h"
-
-// XLib and Qt have some macro collission so XLib should be included after all
+// XLib and Qt have some macro collission so XLib should be included AFTER all
 // clang-format off
 #include <X11/Xlib.h>
 // clang-format on
@@ -65,6 +64,13 @@ void HookThread::run() {
 
         qInfo() << "Event: " << e.xkey.type << e.xkey.keycode;
 
+        /// TODO(clovis)
+        XAllowEvents(d_, ReplayKeyboard, CurrentTime);
+        simulateKeyPress(e.xkey.keycode);
+        XAllowEvents(d_, AsyncKeyboard, CurrentTime);
+        continue;
+        ///
+
         if (isControlKeyDown()) {
             // TODO(clovis): open popup here
 
@@ -107,7 +113,7 @@ bool HookThread::updateHook() {
     return true;
 }
 
-bool HookThread::isControlKeyDown() {
+bool HookThread::isControlKeyDown() const {
     int control_key{Settings::get(Settings::kControlKey).toInt()};
 
     // If control_key is out of bounds
@@ -123,6 +129,42 @@ bool HookThread::isControlKeyDown() {
         static_cast<bool>(keys[control_key / 8] & (1 << control_key % 8))};
 
     return control_key_down;
+}
+
+void HookThread::sendKeyEvent(uint64_t window, uint32_t keycode,
+                              bool is_press_event, uint64_t delay) {
+    XEvent e{};
+    e.xkey.window = window;
+    e.xkey.keycode = keycode;
+    // TODO(clovis): handle modifiers here
+    e.xkey.state = 0;
+    e.xkey.type = is_press_event ? KeyPress : KeyRelease;
+
+    int64_t e_mask{is_press_event ? KeyPressMask : KeyReleaseMask};
+
+    int result{XSendEvent(d_, window, 1, e_mask, &e)};
+
+    // If XSendEvent() fails
+    if (result != 1) {
+        qWarning().noquote()
+            << "Altccents::HookThread [ERROR]: failed to XSendEvent()";
+        return;
+    }
+
+    XFlush(d_);
+
+    if (delay > 0) {
+        usleep(delay);
+    }
+}
+// TODO(clovis): add keymap param
+void HookThread::simulateKeyPress(uint32_t keycode) {
+    Window w{};
+    int revert_to{};
+    XGetInputFocus(d_, &w, &revert_to);
+
+    sendKeyEvent(w, keycode, true, 100);
+    sendKeyEvent(w, keycode, false);
 }
 
 HookManager::HookManager(AltccentsApp* parent)

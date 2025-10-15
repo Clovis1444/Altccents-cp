@@ -25,7 +25,19 @@ class HookThread : public QThread {
     // Returns false if hook was not installed, return true otherwise
     bool updateHook();
 
-    bool isControlKeyDown();
+    bool isControlKeyDown() const;
+
+    // If this function is called INSIDE AN EVENT LOOP - call it LIKE THIS:
+    //// XAllowEvents(..., ReplayKeyboard, ...);
+    //// sendKeyEvent(...); // Function call(s) here
+    //// XAllowEvents(..., AsyncKeyboard, ...);
+    //// continue;
+    //
+    // If you want to send KeyPress event - set is_press_event as true,
+    // otherwise - set is_press_event as false
+    void sendKeyEvent(uint64_t window, uint32_t keycode, bool is_press_event,
+                      uint64_t delay = 0);
+    void simulateKeyPress(uint32_t keycode);
 
     AccentProfile ap_;
     Display* d_{};
