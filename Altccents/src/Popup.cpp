@@ -38,11 +38,18 @@ void Popup::show(const QList<QChar>& chars, unsigned int active_index) {
 
     int margin{Settings::get(Settings::kPopupMargins).toInt()};
     int char_box_size{Settings::get(Settings::kCharBoxSize).toInt()};
+    int tab_size{
+        qMin(Settings::get(Settings::kPopupTabSize).toInt(), char_box_size)};
     int border_width{Settings::get(Settings::kPopupBorderWidth).toInt()};
 
-    int w{static_cast<int>((char_box_size * chars.count()) + border_width +
-                           (margin * (chars.count() + 1)))};
-    int h{char_box_size + border_width + (margin * 2)};
+    int t_h{tab_size};
+
+    int cb_w{static_cast<int>((char_box_size * chars.count()) + border_width +
+                              (margin * (chars.count() + 1)))};
+    int cb_h{char_box_size + border_width + (margin * 2)};
+
+    int w{cb_w};
+    int h{t_h + cb_h};
     resize(w, h);
 
     // Position
@@ -65,14 +72,19 @@ void Popup::paintEvent(QPaintEvent*) {
     p.setRenderHint(QPainter::Antialiasing);
 
     int margin{Settings::get(Settings::kPopupMargins).toInt()};
+    int tab_margin{
+        qMin(Settings::get(Settings::kPopupTabMargins).toInt(), margin)};
     int char_box_size{Settings::get(Settings::kCharBoxSize).toInt()};
+    int tab_size{
+        qMin(Settings::get(Settings::kPopupTabSize).toInt(), char_box_size)};
     QColor background_color{
         Settings::get(Settings::kPopupBackgorundColor).value<QColor>()};
     QColor char_box_color{
         Settings::get(Settings::kCharBoxColor).value<QColor>()};
     QColor char_box_active_color{
         Settings::get(Settings::kCharBoxActiveColor).value<QColor>()};
-    double rounding{Settings::get(Settings::kPopupRounding).toDouble()};
+    double rounding{
+        qBound(0.0, Settings::get(Settings::kPopupRounding).toDouble(), 1.0)};
     int border_width{Settings::get(Settings::kPopupBorderWidth).toInt()};
     QColor border_color{
         Settings::get(Settings::kPopupBorderColor).value<QColor>()};
@@ -85,21 +97,82 @@ void Popup::paintEvent(QPaintEvent*) {
         Settings::get(Settings::kPopupActiveFontColor).value<QColor>()};
     QString font_family{Settings::get(Settings::kPopupFontFamily).toString()};
     int font_point_size{Settings::get(Settings::kPopupFontPointSize).toInt()};
+    int tab_font_point_size{
+        Settings::get(Settings::kPopupTabFontPointSize).toInt()};
     int font_weight{Settings::get(Settings::kPopupFontWeight).toInt()};
     bool font_italic{Settings::get(Settings::kPopupFontItalic).toBool()};
 
     QFont font{font_family, font_point_size, font_weight, font_italic};
     p.setFont(font);
 
-    // Draw Popup box
-    QPainterPath popup_box{};
-
     int offset{border_width / 2};
 
-    QRect popup_rect{offset, offset, width() - (offset * 2),
-                     height() - (offset * 2)};
+    // popup_rect.height() * rounding
+    qreal popup_rect_radius{(char_box_size + (margin * 2) + offset) * rounding};
+    qreal tab_radius{tab_size * rounding};
+    qreal char_box_rect_radius{char_box_size * rounding};
 
-    popup_box.addRoundedRect(popup_rect, rounding, rounding);
+    // p.fillRect(0, 0, width(), height(), Qt::green);
+
+    font.setPointSize(tab_font_point_size);
+    p.setFont(font);
+
+    // TODO(clovis): implement getting symbols for tabs
+    QList<QChar> tabs{'A', 'b', 'f', 'O'};
+    int active_i{2};
+
+    // [1] Draw tabs
+    for (int i{}; i < tabs.count(); ++i) {
+        QPainterPath tab{};
+
+        // Draw tab rect
+        QRect tab_rect{
+            static_cast<int>(popup_rect_radius + ((tab_size + tab_margin) * i)),
+            offset, tab_size, tab_size};
+
+        tab.moveTo(tab_rect.bottomLeft());
+        tab.lineTo(tab_rect.bottomRight());
+        tab.lineTo(tab_rect.right(), tab_rect.top() + tab_radius);
+        // arc
+        tab.arcTo(QRectF(tab_rect.right() - (tab_radius * 2), tab_rect.top(),
+                         tab_radius * 2, (tab_radius * 2)),
+                  0, 90);
+        tab.lineTo(tab_rect.left() + tab_radius, tab_rect.top());
+        // arc
+        tab.arcTo(QRectF(tab_rect.left(), tab_rect.top(), tab_radius * 2,
+                         tab_radius * 2),
+                  90, 90);
+        tab.lineTo(tab_rect.bottomLeft());
+        //
+        QPen tab_pen{};
+        tab_pen.setColor(i == active_i ? char_box_active_border_color
+                                       : char_box_border_color);
+        tab_pen.setWidth(border_width);
+        p.setPen(tab_pen);
+        p.setBrush(i == active_i ? char_box_active_color : background_color);
+
+        tab.closeSubpath();
+        p.drawPath(tab);
+
+        // Draw tab text
+        QPen text_pen;
+        text_pen.setColor(i == active_i ? active_text_color : text_color);
+        p.setPen(text_pen);
+        QTextOption text_options{Qt::AlignCenter};
+        // Draw text
+        p.drawText(tab_rect, tabs[i], text_options);
+    }
+
+    font.setPointSize(font_point_size);
+    p.setFont(font);
+
+    // [2] Draw Popup box
+    QPainterPath popup_box{};
+
+    QRect popup_rect{offset, tab_size + offset, width() - (offset * 2),
+                     char_box_size + (margin * 2) + offset};
+
+    popup_box.addRoundedRect(popup_rect, popup_rect_radius, popup_rect_radius);
 
     QPen popup_pen{};
     popup_pen.setColor(border_color);
@@ -111,14 +184,16 @@ void Popup::paintEvent(QPaintEvent*) {
     p.drawPath(popup_box);
     //
 
-    // Draw char boxes
+    // [3] Draw char boxes
     for (int i{}; i < charCollection_.chars.count(); ++i) {
         QPainterPath char_box{};
 
         QRect char_box_rect{offset + (char_box_size * i) + (margin * (i + 1)),
-                            offset + margin, char_box_size, char_box_size};
+                            popup_rect.top() + margin, char_box_size,
+                            char_box_size};
 
-        char_box.addRoundedRect(char_box_rect, rounding, rounding);
+        char_box.addRoundedRect(char_box_rect, char_box_rect_radius,
+                                char_box_rect_radius);
 
         QPen char_box_pen{};
         QPen text_pen{};

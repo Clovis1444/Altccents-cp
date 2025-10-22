@@ -32,7 +32,8 @@ int main(int argc, char** argv) {
     //     return 1;
     // }
 
-    Altccents::X11::init(altccents);
+    // Altccents::X11::init(altccents);
+    altccents->popup();
 
     return QApplication::exec();
 
