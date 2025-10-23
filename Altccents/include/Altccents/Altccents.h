@@ -83,6 +83,8 @@ class AltccentsApp : public QObject {
         Key key;
         bool is_capital;
         int index;
+
+        bool isEmpty() const { return key == Key{}; }
     };
 
     AccentInput lastAccent_{};

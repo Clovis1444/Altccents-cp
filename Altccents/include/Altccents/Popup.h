@@ -12,7 +12,8 @@ class Popup : public QWidget {
    public:
     explicit Popup(QWidget* parent = nullptr);
 
-    void show(const QList<QChar>& chars, unsigned int active_index);
+    void show(const QList<QChar>& chars, unsigned int active_char,
+              const QList<QChar>& tabs, unsigned int active_tab);
 
    private:
     void paintEvent(QPaintEvent*) override;
@@ -22,7 +23,12 @@ class Popup : public QWidget {
         QList<QChar> chars;
         unsigned int active_index;
     };
+    struct TabCollection {
+        QList<QChar> tabs;
+        unsigned int active_index;
+    };
 
     CharCollection charCollection_;
+    TabCollection tabCollection_;
 };
 }  // namespace Altccents

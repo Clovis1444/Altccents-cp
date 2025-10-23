@@ -25,12 +25,15 @@ Popup::Popup(QWidget* parent) : QWidget{parent} {
     // setAttribute(Qt::WA_NoSystemBackground);
 }
 
-void Popup::show(const QList<QChar>& chars, unsigned int active_index) {
-    if (chars.isEmpty() || active_index >= chars.count()) {
+void Popup::show(const QList<QChar>& chars, unsigned int active_char,
+                 const QList<QChar>& tabs, unsigned int active_tab) {
+    if (chars.isEmpty() || chars.count() <= active_char ||
+        (tabs.count() <= active_tab && !tabs.isEmpty())) {
         return;
     }
 
-    charCollection_ = {.chars = chars, .active_index = active_index};
+    charCollection_ = {.chars = chars, .active_index = active_char};
+    tabCollection_ = {.tabs = tabs, .active_index = active_tab};
 
     // Opacity
     setWindowOpacity(
@@ -42,7 +45,7 @@ void Popup::show(const QList<QChar>& chars, unsigned int active_index) {
         qMin(Settings::get(Settings::kPopupTabSize).toInt(), char_box_size)};
     int border_width{Settings::get(Settings::kPopupBorderWidth).toInt()};
 
-    int t_h{tab_size};
+    int t_h{tabs.isEmpty() ? 0 : tab_size};
 
     int cb_w{static_cast<int>((char_box_size * chars.count()) + border_width +
                               (margin * (chars.count() + 1)))};
@@ -117,12 +120,8 @@ void Popup::paintEvent(QPaintEvent*) {
     font.setPointSize(tab_font_point_size);
     p.setFont(font);
 
-    // TODO(clovis): implement getting symbols for tabs
-    QList<QChar> tabs{'A', 'b', 'f', 'O'};
-    int active_i{2};
-
     // [1] Draw tabs
-    for (int i{}; i < tabs.count(); ++i) {
+    for (int i{}; i < tabCollection_.tabs.count(); ++i) {
         QPainterPath tab{};
 
         // Draw tab rect
@@ -133,34 +132,35 @@ void Popup::paintEvent(QPaintEvent*) {
         tab.moveTo(tab_rect.bottomLeft());
         tab.lineTo(tab_rect.bottomRight());
         tab.lineTo(tab_rect.right(), tab_rect.top() + tab_radius);
-        // arc
         tab.arcTo(QRectF(tab_rect.right() - (tab_radius * 2), tab_rect.top(),
                          tab_radius * 2, (tab_radius * 2)),
                   0, 90);
         tab.lineTo(tab_rect.left() + tab_radius, tab_rect.top());
-        // arc
+        // TODO(clovis): fix arc with r > tab_size/2
         tab.arcTo(QRectF(tab_rect.left(), tab_rect.top(), tab_radius * 2,
                          tab_radius * 2),
                   90, 90);
         tab.lineTo(tab_rect.bottomLeft());
         //
         QPen tab_pen{};
-        tab_pen.setColor(i == active_i ? char_box_active_border_color
-                                       : char_box_border_color);
+        tab_pen.setColor(i == tabCollection_.active_index
+                             ? char_box_active_border_color
+                             : char_box_border_color);
         tab_pen.setWidth(border_width);
         p.setPen(tab_pen);
-        p.setBrush(i == active_i ? char_box_active_color : background_color);
+        p.setBrush(i == tabCollection_.active_index ? char_box_active_color
+                                                    : background_color);
 
         tab.closeSubpath();
         p.drawPath(tab);
 
         // Draw tab text
         QPen text_pen;
-        text_pen.setColor(i == active_i ? active_text_color : text_color);
+        text_pen.setColor(i == tabCollection_.active_index ? active_text_color
+                                                           : text_color);
         p.setPen(text_pen);
         QTextOption text_options{Qt::AlignCenter};
-        // Draw text
-        p.drawText(tab_rect, tabs[i], text_options);
+        p.drawText(tab_rect, tabCollection_.tabs[i], text_options);
     }
 
     font.setPointSize(font_point_size);
@@ -169,8 +169,9 @@ void Popup::paintEvent(QPaintEvent*) {
     // [2] Draw Popup box
     QPainterPath popup_box{};
 
-    QRect popup_rect{offset, tab_size + offset, width() - (offset * 2),
-                     char_box_size + (margin * 2) + offset};
+    QRect popup_rect{
+        offset, (tabCollection_.tabs.isEmpty() ? 0 : tab_size) + offset,
+        width() - (offset * 2), char_box_size + (margin * 2) + offset};
 
     popup_box.addRoundedRect(popup_rect, popup_rect_radius, popup_rect_radius);
 

@@ -428,5 +428,42 @@ void AltccentsApp::setSaveCache(bool val) {
     updateTray();
 }
 
-void AltccentsApp::popup() { popup_->show({'s', '2', 'k', 'K', 'y'}, 2); }
+void AltccentsApp::popup() {
+    // TODO(clovis): implement storing this values somewhere
+    lastAccent_ = AccentInput{.key = Key{26}, .is_capital = false, .index = 2};
+
+    if (lastAccent_.isEmpty()) {
+        return;
+    }
+
+    const AccentProfile profile{activeProfile()};
+
+    QList<QChar> chars{profile.chars(lastAccent_.key, lastAccent_.is_capital)};
+
+    // TODO(clovis): implement tabs better???????????
+    // Consider replacing QHash with ordered map
+    QList<QChar> tabs{};
+    unsigned int active_tab{};
+
+    const auto& accents{profile.accents()};
+    unsigned int index{};
+    for (const auto& i : accents.keys()) {
+        QChar capital{accents[i].second.isEmpty() ? '\0'
+                                                  : accents[i].second[0]};
+        QChar not_capital{accents[i].first.isEmpty() ? '\0'
+                                                     : accents[i].first[0]};
+        QChar tab{lastAccent_.is_capital
+                      ? (capital.isNull() ? not_capital : capital)
+                      : (not_capital.isNull() ? capital : not_capital)};
+        tabs.push_back(tab);
+
+        if (i == lastAccent_.key) {
+            active_tab = index;
+        }
+        ++index;
+    }
+
+    popup_->show(chars, static_cast<unsigned int>(lastAccent_.index), tabs,
+                 active_tab);
+}
 }  // namespace Altccents
