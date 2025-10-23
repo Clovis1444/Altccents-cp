@@ -112,7 +112,8 @@ void Popup::paintEvent(QPaintEvent*) {
 
     // popup_rect.height() * rounding
     qreal popup_rect_radius{(char_box_size + (margin * 2) + offset) * rounding};
-    qreal tab_radius{tab_size * rounding};
+    // Use qMin() to prevent bizzare shapes
+    qreal tab_radius{tab_size * qMin(rounding, 0.5)};
     qreal char_box_rect_radius{char_box_size * rounding};
 
     // p.fillRect(0, 0, width(), height(), Qt::green);
@@ -136,7 +137,6 @@ void Popup::paintEvent(QPaintEvent*) {
                          tab_radius * 2, (tab_radius * 2)),
                   0, 90);
         tab.lineTo(tab_rect.left() + tab_radius, tab_rect.top());
-        // TODO(clovis): fix arc with r > tab_size/2
         tab.arcTo(QRectF(tab_rect.left(), tab_rect.top(), tab_radius * 2,
                          tab_radius * 2),
                   90, 90);
