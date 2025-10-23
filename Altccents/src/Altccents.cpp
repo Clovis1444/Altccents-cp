@@ -446,21 +446,24 @@ void AltccentsApp::popup() {
     unsigned int active_tab{};
 
     const auto& accents{profile.accents()};
-    unsigned int index{};
-    for (const auto& i : accents.keys()) {
-        QChar capital{accents[i].second.isEmpty() ? '\0'
-                                                  : accents[i].second[0]};
-        QChar not_capital{accents[i].first.isEmpty() ? '\0'
-                                                     : accents[i].first[0]};
-        QChar tab{lastAccent_.is_capital
-                      ? (capital.isNull() ? not_capital : capital)
-                      : (not_capital.isNull() ? capital : not_capital)};
+    unsigned int active_tab_index{};
+    for (const auto& key : accents.keys()) {
+        QChar capital{accents[key].second.isEmpty() ? '\0'
+                                                    : accents[key].second[0]};
+        QChar not_capital{accents[key].first.isEmpty() ? '\0'
+                                                       : accents[key].first[0]};
+        QChar tab{};
+        if (lastAccent_.is_capital) {
+            tab = capital.isNull() ? not_capital : capital;
+        } else {
+            tab = not_capital.isNull() ? capital : not_capital;
+        }
         tabs.push_back(tab);
 
-        if (i == lastAccent_.key) {
-            active_tab = index;
+        if (key == lastAccent_.key) {
+            active_tab = active_tab_index;
         }
-        ++index;
+        ++active_tab_index;
     }
 
     popup_->show(chars, static_cast<unsigned int>(lastAccent_.index), tabs,
