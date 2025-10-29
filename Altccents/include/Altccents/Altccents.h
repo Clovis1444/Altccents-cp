@@ -62,6 +62,9 @@ class AltccentsApp : public QObject {
     void popup();
     WId popupWId() const { return popup_ ? popup_->winId() : 0; }
 
+    // Returns <Tab titles list, active tab index>
+    QPair<QList<QChar>, unsigned int> tabsFromAccentInput() const;
+
    signals:
     void activeProfileChanged();
     void programStateChanged(bool);
@@ -87,7 +90,7 @@ class AltccentsApp : public QObject {
         bool isEmpty() const { return key == Key{}; }
     };
 
-    AccentInput lastAccent_{};
+    AccentInput accentInput_{};
 };  // AltccentsApp
 
 constexpr AltccentsApp::updateTrayFlag operator|(

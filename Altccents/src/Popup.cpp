@@ -70,6 +70,7 @@ void Popup::show(const QList<QChar>& chars, unsigned int active_char,
     QWidget::show();
 }
 
+// TODO(clovis): implement case where tabs width > chars width
 void Popup::paintEvent(QPaintEvent*) {
     QPainter p{this};
     p.setRenderHint(QPainter::Antialiasing);

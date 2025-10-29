@@ -80,9 +80,16 @@ class AccentProfile {
                    QJsonDocument::Indented) const;
 
     bool contains(Key key) const { return accents_.contains(key); };
-    QList<QChar> chars(Key key, bool is_capital) const {
+    // Returns raw QChar list
+    QList<QChar> rawChars(Key key, bool is_capital) const {
         return is_capital ? accents_[key].upper : accents_[key].lower;
     };
+
+    // Returns QChar list assuming lower and upper must have the same size OR
+    // one is empty while other is not.
+    // If upper or lower is empty - returns non empty one. Returns empty list on
+    // fail
+    QList<QChar> chars(const Key& key, bool is_capital) const;
 
    private:
     static QList<QChar> decerializeCharArr(const QJsonArray& json_arr);

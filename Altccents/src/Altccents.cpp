@@ -221,28 +221,29 @@ void AltccentsApp::setActiveProfile() {
 QChar AltccentsApp::nextAccent(const Key& key, bool is_capital) {
     // If there is no key in the profile - return
     if (!activeAccentProfile_.contains(key)) {
-        lastAccent_ = {};
+        accentInput_ = {};
         return {};
     }
 
-    QList<QChar> chars{activeAccentProfile_.chars(key, is_capital)};
+    QList<QChar> chars{activeAccentProfile_.rawChars(key, is_capital)};
 
     // If there is no chars for this Case - return
     if (chars.isEmpty()) {
-        lastAccent_ = {};
+        accentInput_ = {};
         return {};
     }
 
     // If AccentInput is the same as last one - just change index
-    if (lastAccent_.key == key && lastAccent_.is_capital == is_capital) {
-        int index{
-            lastAccent_.index >= chars.count() - 1 ? 0 : lastAccent_.index + 1};
+    if (accentInput_.key == key && accentInput_.is_capital == is_capital) {
+        int index{accentInput_.index >= chars.count() - 1
+                      ? 0
+                      : accentInput_.index + 1};
 
-        lastAccent_.index = index;
+        accentInput_.index = index;
         return chars[index];
     }
     // Otherwise - return char with index 0
-    lastAccent_ = {.key = key, .is_capital = is_capital, .index = 0};
+    accentInput_ = {.key = key, .is_capital = is_capital, .index = 0};
     return chars[0];
 }
 
@@ -429,44 +430,54 @@ void AltccentsApp::setSaveCache(bool val) {
 }
 
 void AltccentsApp::popup() {
-    // TODO(clovis): implement storing this values somewhere
-    lastAccent_ = AccentInput{.key = Key{26}, .is_capital = false, .index = 2};
+    // TODO(clovis): at least is_capital should be passed as param?
+    if (popup_->isHidden()) {
+        QList<Key> keys{activeAccentProfile_.accents().keys()};
 
-    if (lastAccent_.isEmpty()) {
-        return;
+        if (keys.isEmpty()) {
+            return;
+        }
+
+        accentInput_ =
+            AccentInput{.key = keys[0], .is_capital = false, .index = 0};
     }
 
     const AccentProfile profile{activeProfile()};
 
-    QList<QChar> chars{profile.chars(lastAccent_.key, lastAccent_.is_capital)};
+    QList<QChar> chars{
+        profile.chars(accentInput_.key, accentInput_.is_capital)};
 
-    // TODO(clovis): implement tabs better???????????
-    // Consider replacing QHash with ordered map
-    QList<QChar> tabs{};
-    unsigned int active_tab{};
+    auto tab_list{tabsFromAccentInput()};
 
-    const auto& accents{profile.accents()};
-    unsigned int active_tab_index{};
+    popup_->show(chars, static_cast<unsigned int>(accentInput_.index),
+                 tab_list.first, tab_list.second);
+}
+
+QPair<QList<QChar>, unsigned int> AltccentsApp::tabsFromAccentInput() const {
+    const auto accents{activeAccentProfile_.accents()};
+
+    QPair<QList<QChar>, unsigned int> tabs{};
+
+    unsigned int i{};
     for (const auto& key : accents.keys()) {
         QChar capital{accents[key].upper.isEmpty() ? '\0'
                                                    : accents[key].upper[0]};
         QChar not_capital{accents[key].lower.isEmpty() ? '\0'
                                                        : accents[key].lower[0]};
         QChar tab{};
-        if (lastAccent_.is_capital) {
+        if (accentInput_.is_capital) {
             tab = capital.isNull() ? not_capital : capital;
         } else {
             tab = not_capital.isNull() ? capital : not_capital;
         }
-        tabs.push_back(tab);
+        tabs.first.push_back(tab);
 
-        if (key == lastAccent_.key) {
-            active_tab = active_tab_index;
+        if (key == accentInput_.key) {
+            tabs.second = i;
         }
-        ++active_tab_index;
+        ++i;
     }
 
-    popup_->show(chars, static_cast<unsigned int>(lastAccent_.index), tabs,
-                 active_tab);
+    return tabs;
 }
 }  // namespace Altccents

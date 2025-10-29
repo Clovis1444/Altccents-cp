@@ -118,6 +118,21 @@ void AccentProfile::print(const QJsonDocument::JsonFormat& format) const {
     qInfo().noquote() << toQJsonDocument().toJson(format).trimmed();
 }
 
+QList<QChar> AccentProfile::chars(const Key& key, bool is_capital) const {
+    if (!accents_.contains(key)) {
+        return {};
+    }
+
+    const KeySymbols& symbols{accents_[key]};
+
+    if (symbols.lower.count() == symbols.upper.count()) {
+        return is_capital ? symbols.upper : symbols.lower;
+    }
+
+    return symbols.lower.count() > symbols.upper.count() ? symbols.lower
+                                                         : symbols.upper;
+}
+
 //
 // PRIVATE
 //
