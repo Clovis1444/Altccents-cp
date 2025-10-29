@@ -72,19 +72,27 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
             continue;
         }
 
-        // Lower
+        // Lower and Upper
         QJsonArray lower{obj[kJsonLowerKey].toArray()};
-        QList<QChar> lower_list{decerializeCharArr(lower)};
-
-        // Upper
         QJsonArray upper{obj[kJsonUpperKey].toArray()};
-        QList<QChar> upper_list{decerializeCharArr(upper)};
 
+        // Check IF lower and upper is the same size OR one is empty and other
+        // is not empty
+        if (lower.count() != upper.count() &&
+            !(lower.isEmpty() != upper.isEmpty())) {
+            QString error{
+                R"(Both "%1" and "%2" should be the same size OR one should be empty while other is not)"};
+            warning(error.arg(kJsonLowerKey).arg(kJsonUpperKey));
+            continue;
+        }
         if (lower.isEmpty() && upper.isEmpty()) {
             QString error{R"(Both "%1" and "%2" are empty)"};
             warning(error.arg(kJsonLowerKey).arg(kJsonUpperKey));
             continue;
         }
+
+        QList<QChar> lower_list{decerializeCharArr(lower)};
+        QList<QChar> upper_list{decerializeCharArr(upper)};
 
         // Insert accents
         accents_.insert(key, {lower_list, upper_list});
