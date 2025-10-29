@@ -154,13 +154,13 @@ QJsonDocument AccentProfile::toQJsonDocument() const {
         obj[kJsonKeyKey] = accents_.key(i).kc();
 
         QJsonArray lower{};
-        for (const QChar& j : i.first) {
+        for (const QChar& j : i.lower) {
             lower.append(QString{j});
         }
         obj[kJsonLowerKey] = lower;
 
         QJsonArray upper{};
-        for (const QChar& j : i.second) {
+        for (const QChar& j : i.upper) {
             upper.append(QString{j});
         }
         obj[kJsonUpperKey] = upper;

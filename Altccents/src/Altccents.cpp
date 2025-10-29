@@ -448,10 +448,10 @@ void AltccentsApp::popup() {
     const auto& accents{profile.accents()};
     unsigned int active_tab_index{};
     for (const auto& key : accents.keys()) {
-        QChar capital{accents[key].second.isEmpty() ? '\0'
-                                                    : accents[key].second[0]};
-        QChar not_capital{accents[key].first.isEmpty() ? '\0'
-                                                       : accents[key].first[0]};
+        QChar capital{accents[key].upper.isEmpty() ? '\0'
+                                                   : accents[key].upper[0]};
+        QChar not_capital{accents[key].lower.isEmpty() ? '\0'
+                                                       : accents[key].lower[0]};
         QChar tab{};
         if (lastAccent_.is_capital) {
             tab = capital.isNull() ? not_capital : capital;

@@ -44,6 +44,15 @@ constexpr QDebug& operator<<(QDebug& q_debug, const Key& key) {
     return q_debug.noquote() << QString{"Key{%1}"}.arg(key.kc());
 }
 
+struct KeySymbols {
+    QList<QChar> lower;
+    QList<QChar> upper;
+
+    constexpr bool operator==(const KeySymbols& other) const {
+        return lower == other.lower && upper == other.upper;
+    }
+};
+
 class AccentProfile {
    public:
     AccentProfile(const QByteArray& data, const QFileInfo& fileInfo);
@@ -60,9 +69,7 @@ class AccentProfile {
         QJsonDocument::JsonFormat format = QJsonDocument::Indented);
 
     QFileInfo fileInfo() const { return fileInfo_; }
-    QHash<Key, QPair<QList<QChar>, QList<QChar>>> accents() const {
-        return accents_;
-    };
+    QHash<Key, KeySymbols> accents() const { return accents_; };
     QString filePath() const { return fileInfo_.absoluteFilePath(); }
     QString name() const { return fileInfo_.baseName(); }
 
@@ -74,7 +81,7 @@ class AccentProfile {
 
     bool contains(Key key) const { return accents_.contains(key); };
     QList<QChar> chars(Key key, bool is_capital) const {
-        return is_capital ? accents_[key].second : accents_[key].first;
+        return is_capital ? accents_[key].upper : accents_[key].lower;
     };
 
    private:
@@ -102,8 +109,7 @@ class AccentProfile {
             .arg(kJsonLowerKey)
             .arg(kJsonUpperKey)};
 
-    // QHash<Key QPair<lower, upper>>
-    QHash<Key, QPair<QList<QChar>, QList<QChar>>> accents_;
+    QHash<Key, KeySymbols> accents_;
     QFileInfo fileInfo_;
 };
 };  // namespace Altccents
