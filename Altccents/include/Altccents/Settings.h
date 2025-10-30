@@ -38,6 +38,12 @@ class Settings {
     inline static const QString kLogoOnFilePath{kResourcesDir +
                                                 "logo128_on.png"};
 
+    inline static const QList<Qt::Key> kNextAccentKeys{Qt::Key_K,
+                                                       Qt::Key_Right};
+    inline static const QList<Qt::Key> kPrevAccentKeys{Qt::Key_J, Qt::Key_Left};
+    inline static const QList<Qt::Key> kNextTabKeys{Qt::Key_L, Qt::Key_Up};
+    inline static const QList<Qt::Key> kPrevTabKeys{Qt::Key_H, Qt::Key_Down};
+
     // NOLINTNEXTLINE
     enum SettingsType {
         kPopupX,

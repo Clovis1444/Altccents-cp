@@ -223,10 +223,51 @@ void Popup::paintEvent(QPaintEvent*) {
 }
 
 void Popup::keyPressEvent(QKeyEvent* e) {
-    qInfo() << "[POPUP]: " << e->text();
-
-    // TODO(clovis): implement popup logic here
+    switch (e->key()) {
+        case Qt::Key_Shift: {
+            emit capitalChanged(true);
+            break;
+        }
+        default:
+            break;
+    }
 
     QWidget::keyPressEvent(e);
+}
+
+void Popup::keyReleaseEvent(QKeyEvent* e) {
+    if (Settings::kNextAccentKeys.contains(e->key())) {
+        emit nextAccent(true);
+    }
+    if (Settings::kPrevAccentKeys.contains(e->key())) {
+        emit nextAccent(false);
+    }
+    if (Settings::kNextTabKeys.contains(e->key())) {
+        emit nextTab(true);
+    }
+    if (Settings::kPrevTabKeys.contains(e->key())) {
+        emit nextTab(false);
+    }
+
+    switch (e->key()) {
+        case Qt::Key_Shift: {
+            emit capitalChanged(false);
+            break;
+        }
+        case Qt::Key_Return: {
+            emit accentChosen();
+            hide();
+            break;
+        }
+        default:
+            break;
+    }
+
+    QWidget::keyReleaseEvent(e);
+}
+
+void Popup::hideEvent(QHideEvent* e) {
+    emit hidden();
+    QWidget::hideEvent(e);
 }
 }  // namespace Altccents

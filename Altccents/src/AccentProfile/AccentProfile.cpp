@@ -95,7 +95,7 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
         QList<QChar> upper_list{decerializeCharArr(upper)};
 
         // Insert accents
-        accents_.insert(key, {lower_list, upper_list});
+        accents_.insert(key, {.lower = lower_list, .upper = upper_list});
     }
 };
 

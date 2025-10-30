@@ -35,6 +35,8 @@ class AltccentsApp : public QObject {
     void setActiveProfile();
 
     QChar nextAccent(const Key& key, bool is_capital);
+    void inputAccentNext(bool forward = true);
+    void inputTabNext(bool forward = true);
 
     void updateTrayIcon();
     void updateTrayMenu();
@@ -69,6 +71,13 @@ class AltccentsApp : public QObject {
     void activeProfileChanged();
     void programStateChanged(bool);
 
+   private slots:
+    void onPopupHidden();
+    void onPopupAccentChosen();
+    void onPopupNextAccent(bool forward);
+    void onPopupNextTab(bool forward);
+    void onPopupCapitalChanged(bool is_capital);
+
    private:
     AccentProfile activeAccentProfile_;
     QList<AccentProfile> loadedAccentProfiles_;
@@ -85,7 +94,7 @@ class AltccentsApp : public QObject {
     struct AccentInput {
         Key key;
         bool is_capital;
-        int index;
+        qsizetype index;
 
         bool isEmpty() const { return key == Key{}; }
     };

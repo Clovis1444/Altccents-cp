@@ -113,6 +113,18 @@ AltccentsApp::AltccentsApp()
     // Tooltip
     updateTrayToolTip();
 
+    // Popup signals
+    QObject::connect(popup_, &Popup::hidden, this,
+                     &AltccentsApp::onPopupHidden);
+    QObject::connect(popup_, &Popup::accentChosen, this,
+                     &AltccentsApp::onPopupAccentChosen);
+    QObject::connect(popup_, &Popup::nextAccent, this,
+                     &AltccentsApp::onPopupNextAccent);
+    QObject::connect(popup_, &Popup::nextTab, this,
+                     &AltccentsApp::onPopupNextTab);
+    QObject::connect(popup_, &Popup::capitalChanged, this,
+                     &AltccentsApp::onPopupCapitalChanged);
+
     tray_->show();
 }
 
@@ -235,9 +247,9 @@ QChar AltccentsApp::nextAccent(const Key& key, bool is_capital) {
 
     // If AccentInput is the same as last one - just change index
     if (accentInput_.key == key && accentInput_.is_capital == is_capital) {
-        int index{accentInput_.index >= chars.count() - 1
-                      ? 0
-                      : accentInput_.index + 1};
+        qsizetype index{accentInput_.index >= chars.count() - 1
+                            ? 0
+                            : accentInput_.index + 1};
 
         accentInput_.index = index;
         return chars[index];
@@ -245,6 +257,54 @@ QChar AltccentsApp::nextAccent(const Key& key, bool is_capital) {
     // Otherwise - return char with index 0
     accentInput_ = {.key = key, .is_capital = is_capital, .index = 0};
     return chars[0];
+}
+void AltccentsApp::inputAccentNext(bool forward) {
+    if (accentInput_.key == Key{} ||
+        !activeAccentProfile_.contains(accentInput_.key)) {
+        return;
+    }
+
+    KeySymbols ks{activeAccentProfile_.accents()[accentInput_.key]};
+    qsizetype symbols_count{qMax(ks.lower.count(), ks.upper.count())};
+
+    if (forward) {
+        ++accentInput_.index;
+        if (accentInput_.index >= symbols_count) accentInput_.index = 0;
+    } else {
+        --accentInput_.index;
+        if (accentInput_.index < 0)
+            accentInput_.index = qMax(symbols_count - 1, 0);
+    }
+}
+void AltccentsApp::inputTabNext(bool forward) {
+    if (accentInput_.key == Key{} ||
+        !activeAccentProfile_.contains(accentInput_.key)) {
+        return;
+    }
+
+    QList<Key> keys{activeAccentProfile_.accents().keys()};
+    if (keys.isEmpty()) {
+        return;
+    }
+
+    qsizetype keys_count{keys.count()};
+    qsizetype key_index{keys.indexOf(accentInput_.key)};
+
+    if (forward) {
+        ++key_index;
+        if (key_index >= keys_count) key_index = 0;
+    } else {
+        --key_index;
+        if (key_index < 0) key_index = qMax(keys_count - 1, 0);
+    }
+
+    Key new_key{keys[key_index]};
+    if (new_key == accentInput_.key) {
+        return;
+    }
+
+    accentInput_.key = new_key;
+    accentInput_.index = 0;
 }
 
 void AltccentsApp::updateTrayIcon() {
@@ -430,16 +490,18 @@ void AltccentsApp::setSaveCache(bool val) {
 }
 
 void AltccentsApp::popup() {
-    // TODO(clovis): at least is_capital should be passed as param?
-    if (popup_->isHidden()) {
+    if (popup_->isHidden() || accentInput_.isEmpty()) {
         QList<Key> keys{activeAccentProfile_.accents().keys()};
 
         if (keys.isEmpty()) {
             return;
         }
 
-        accentInput_ =
-            AccentInput{.key = keys[0], .is_capital = false, .index = 0};
+        accentInput_ = AccentInput{
+            .key = keys[0],
+            .is_capital =
+                QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier),
+            .index = 0};
     }
 
     const AccentProfile profile{activeProfile()};
@@ -479,5 +541,30 @@ QPair<QList<QChar>, unsigned int> AltccentsApp::tabsFromAccentInput() const {
     }
 
     return tabs;
+}
+
+void AltccentsApp::onPopupHidden() { accentInput_ = {}; }
+void AltccentsApp::onPopupAccentChosen() {
+    // TODO(clovis): fix possible segfault here if one of registers is empty.
+    // Create function AccentProfile::getAccent(Key, is_capital, index)
+    QChar accent_to_send{accentInput_.is_capital
+                             ? activeAccentProfile_.accents()[accentInput_.key]
+                                   .upper[accentInput_.index]
+                             : activeAccentProfile_.accents()[accentInput_.key]
+                                   .lower[accentInput_.index]};
+    // TODO(clovis): implement emitting accent signal here
+    qInfo() << "Accent to send:" << accent_to_send;
+}
+void AltccentsApp::onPopupNextAccent(bool forward) {
+    inputAccentNext(forward);
+    popup();
+}
+void AltccentsApp::onPopupNextTab(bool forward) {
+    inputTabNext(forward);
+    popup();
+}
+void AltccentsApp::onPopupCapitalChanged(bool is_capital) {
+    accentInput_.is_capital = is_capital;
+    popup();
 }
 }  // namespace Altccents
