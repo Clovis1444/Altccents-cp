@@ -91,6 +91,8 @@ class AccentProfile {
     // fail
     QList<QChar> chars(const Key& key, bool is_capital) const;
 
+    QChar getChar(const Key& key, bool is_capital, qsizetype index) const;
+
    private:
     static QList<QChar> decerializeCharArr(const QJsonArray& json_arr);
 

@@ -545,15 +545,14 @@ QPair<QList<QChar>, unsigned int> AltccentsApp::tabsFromAccentInput() const {
 
 void AltccentsApp::onPopupHidden() { accentInput_ = {}; }
 void AltccentsApp::onPopupAccentChosen() {
-    // TODO(clovis): fix possible segfault here if one of registers is empty.
-    // Create function AccentProfile::getAccent(Key, is_capital, index)
-    QChar accent_to_send{accentInput_.is_capital
-                             ? activeAccentProfile_.accents()[accentInput_.key]
-                                   .upper[accentInput_.index]
-                             : activeAccentProfile_.accents()[accentInput_.key]
-                                   .lower[accentInput_.index]};
-    // TODO(clovis): implement emitting accent signal here
-    qInfo() << "Accent to send:" << accent_to_send;
+    QChar accent_to_send{activeAccentProfile_.getChar(
+        accentInput_.key, accentInput_.is_capital, accentInput_.index)};
+
+    if (accent_to_send.isNull()) {
+        return;
+    }
+
+    emit charSendRequested(accentInput_.key, accent_to_send);
 }
 void AltccentsApp::onPopupNextAccent(bool forward) {
     inputAccentNext(forward);

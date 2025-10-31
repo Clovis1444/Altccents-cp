@@ -70,6 +70,7 @@ class AltccentsApp : public QObject {
    signals:
     void activeProfileChanged();
     void programStateChanged(bool);
+    void charSendRequested(Key key, QChar ch);
 
    private slots:
     void onPopupHidden();

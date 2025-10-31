@@ -132,6 +132,20 @@ QList<QChar> AccentProfile::chars(const Key& key, bool is_capital) const {
     return symbols.lower.count() > symbols.upper.count() ? symbols.lower
                                                          : symbols.upper;
 }
+QChar AccentProfile::getChar(const Key& key, bool is_capital,
+                             qsizetype index) const {
+    if (!accents_.contains(key) || index < 0) {
+        return {};
+    }
+
+    QList<QChar> list{chars(key, is_capital)};
+
+    if (qMax(list.count() - 1, 0) < index) {
+        return {};
+    }
+
+    return list[index];
+}
 
 //
 // PRIVATE
