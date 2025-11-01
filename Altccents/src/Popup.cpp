@@ -254,9 +254,9 @@ void Popup::keyReleaseEvent(QKeyEvent* e) {
             emit capitalChanged(false);
             break;
         }
+        // TODO(clovis): add copy to clipboard shortcut here (ctrl + c?)
         case Qt::Key_Return: {
             emit accentChosen();
-            hide();
             break;
         }
         default:

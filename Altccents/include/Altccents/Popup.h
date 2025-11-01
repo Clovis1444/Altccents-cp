@@ -17,6 +17,8 @@ class Popup : public QWidget {
 
    signals:
     void hidden();
+    // Note: Popup::hide() should be explicitly called after this signal was
+    // emited
     void accentChosen();
     void nextAccent(bool forward);
     void nextTab(bool forward);

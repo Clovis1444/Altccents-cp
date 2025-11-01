@@ -552,6 +552,7 @@ void AltccentsApp::onPopupAccentChosen() {
         return;
     }
 
+    popup_->hide();
     emit charSendRequested(accentInput_.key, accent_to_send);
 }
 void AltccentsApp::onPopupNextAccent(bool forward) {
