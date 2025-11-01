@@ -230,34 +230,6 @@ void AltccentsApp::setActiveProfile() {
     emit activeProfileChanged();
 }
 
-QChar AltccentsApp::nextAccent(const Key& key, bool is_capital) {
-    // If there is no key in the profile - return
-    if (!activeAccentProfile_.contains(key)) {
-        accentInput_ = {};
-        return {};
-    }
-
-    QList<QChar> chars{activeAccentProfile_.rawChars(key, is_capital)};
-
-    // If there is no chars for this Case - return
-    if (chars.isEmpty()) {
-        accentInput_ = {};
-        return {};
-    }
-
-    // If AccentInput is the same as last one - just change index
-    if (accentInput_.key == key && accentInput_.is_capital == is_capital) {
-        qsizetype index{accentInput_.index >= chars.count() - 1
-                            ? 0
-                            : accentInput_.index + 1};
-
-        accentInput_.index = index;
-        return chars[index];
-    }
-    // Otherwise - return char with index 0
-    accentInput_ = {.key = key, .is_capital = is_capital, .index = 0};
-    return chars[0];
-}
 void AltccentsApp::inputAccentNext(bool forward) {
     if (accentInput_.key == Key{} ||
         !activeAccentProfile_.contains(accentInput_.key)) {

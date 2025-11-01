@@ -34,7 +34,6 @@ class AltccentsApp : public QObject {
     void setActiveProfile(const QString& profile);
     void setActiveProfile();
 
-    QChar nextAccent(const Key& key, bool is_capital);
     void inputAccentNext(bool forward = true);
     void inputTabNext(bool forward = true);
 
