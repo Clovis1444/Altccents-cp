@@ -2,6 +2,7 @@
 
 #include <QActionGroup>
 #include <QApplication>
+#include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
@@ -96,6 +97,8 @@ AltccentsApp::AltccentsApp() : popup_{new Popup{}} {
                      &AltccentsApp::onPopupHidden);
     QObject::connect(popup_, &Popup::accentChosen, this,
                      &AltccentsApp::onPopupAccentChosen);
+    QObject::connect(popup_, &Popup::accentCopyChosen, this,
+                     &AltccentsApp::onPopupAccentCopyChosen);
     QObject::connect(popup_, &Popup::nextAccent, this,
                      &AltccentsApp::onPopupNextAccent);
     QObject::connect(popup_, &Popup::nextTab, this,
@@ -531,11 +534,25 @@ void AltccentsApp::onPopupAccentChosen() {
         accentInput_.key, accentInput_.is_capital, accentInput_.index)};
 
     if (accent_to_send.isNull()) {
+        popup_->hide();
         return;
     }
 
     popup_->hide();
     emit charSendRequested(accentInput_.key, accent_to_send);
+}
+void AltccentsApp::onPopupAccentCopyChosen() {
+    QChar accent_to_copy{activeAccentProfile_.getChar(
+        accentInput_.key, accentInput_.is_capital, accentInput_.index)};
+
+    if (accent_to_copy.isNull()) {
+        popup_->hide();
+        return;
+    }
+
+    // TODO(clovis): sometimes getting an QXcbClipboard error on LMDE
+    QApplication::clipboard()->setText(accent_to_copy);
+    popup_->hide();
 }
 void AltccentsApp::onPopupNextAccent(bool forward) {
     inputAccentNext(forward);

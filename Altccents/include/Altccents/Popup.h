@@ -20,6 +20,9 @@ class Popup : public QWidget {
     // Note: Popup::hide() should be explicitly called after this signal was
     // emited
     void accentChosen();
+    // Note: Popup::hide() should be explicitly called after this signal was
+    // emited
+    void accentCopyChosen();
     void nextAccent(bool forward);
     void nextTab(bool forward);
     void capitalChanged(bool is_capital);

@@ -74,6 +74,7 @@ class AltccentsApp : public QObject {
    private slots:
     void onPopupHidden();
     void onPopupAccentChosen();
+    void onPopupAccentCopyChosen();
     void onPopupNextAccent(bool forward);
     void onPopupNextTab(bool forward);
     void onPopupCapitalChanged(bool is_capital);
