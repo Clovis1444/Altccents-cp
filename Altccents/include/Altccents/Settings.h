@@ -72,6 +72,7 @@ class Settings {
         kProgramState,
         kSaveCache,
         kControlKey,
+        kOneShotMode,
         // Insert new members here
         kEnumLength
     };
@@ -149,6 +150,13 @@ class Settings {
             qFatal() << "Altccents::Settings::get() [FATAL]: setting_.count() "
                         "and SettingsType enum length does not match!";
         };
+
+        // Always launch app on one shot mod on linux
+#ifdef __linux__
+        if (s == kOneShotMode) {
+            return true;
+        }
+#endif
 
         bool val_is_null{settings_[s].val.isNull()};
         bool val_has_wrong_type{settings_[s].val.metaType() !=
@@ -269,6 +277,8 @@ class Settings {
         {kProgramState, {.key{"Cache/program_state"}, .def_val{true}, .val{}}},
         {kSaveCache, {.key{"Cache/save_cache"}, .def_val{true}, .val{}}},
         {kControlKey, {.key{"General/control_key"}, .def_val{77}, .val{}}},
+        {kOneShotMode,
+         {.key{"General/one_shot_mode"}, .def_val{false}, .val{}}},
         //
     };
 };

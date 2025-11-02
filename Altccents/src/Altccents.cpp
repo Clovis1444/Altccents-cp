@@ -84,16 +84,32 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     return profiles;
 }
 
-AltccentsApp::AltccentsApp()
-    : tray_{new QSystemTrayIcon{}},
-      trayMenu_{new QMenu{}},
-      popup_{new Popup{}} {
+AltccentsApp::AltccentsApp() : popup_{new Popup{}} {
     // Without this line the program will close after closing message box
     QApplication::setQuitOnLastWindowClosed(false);
     // Accent Profiles MUST be loaded before config
     loadAccentProfiles();
     loadConfig();
 
+    // Popup signals
+    QObject::connect(popup_, &Popup::hidden, this,
+                     &AltccentsApp::onPopupHidden);
+    QObject::connect(popup_, &Popup::accentChosen, this,
+                     &AltccentsApp::onPopupAccentChosen);
+    QObject::connect(popup_, &Popup::nextAccent, this,
+                     &AltccentsApp::onPopupNextAccent);
+    QObject::connect(popup_, &Popup::nextTab, this,
+                     &AltccentsApp::onPopupNextTab);
+    QObject::connect(popup_, &Popup::capitalChanged, this,
+                     &AltccentsApp::onPopupCapitalChanged);
+
+    // If running in one shot mode - do not create tray icon
+    if (Settings::get(Settings::kOneShotMode).toBool()) {
+        return;
+    }
+
+    tray_ = new QSystemTrayIcon{};
+    trayMenu_ = new QMenu{};
     //
     // Tray
     //
@@ -112,18 +128,6 @@ AltccentsApp::AltccentsApp()
 
     // Tooltip
     updateTrayToolTip();
-
-    // Popup signals
-    QObject::connect(popup_, &Popup::hidden, this,
-                     &AltccentsApp::onPopupHidden);
-    QObject::connect(popup_, &Popup::accentChosen, this,
-                     &AltccentsApp::onPopupAccentChosen);
-    QObject::connect(popup_, &Popup::nextAccent, this,
-                     &AltccentsApp::onPopupNextAccent);
-    QObject::connect(popup_, &Popup::nextTab, this,
-                     &AltccentsApp::onPopupNextTab);
-    QObject::connect(popup_, &Popup::capitalChanged, this,
-                     &AltccentsApp::onPopupCapitalChanged);
 
     tray_->show();
 }
@@ -515,7 +519,13 @@ QPair<QList<QChar>, unsigned int> AltccentsApp::tabsFromAccentInput() const {
     return tabs;
 }
 
-void AltccentsApp::onPopupHidden() { accentInput_ = {}; }
+void AltccentsApp::onPopupHidden() {
+    accentInput_ = {};
+
+    if (Settings::get(Settings::kOneShotMode).toBool()) {
+        QApplication::quit();
+    }
+}
 void AltccentsApp::onPopupAccentChosen() {
     QChar accent_to_send{activeAccentProfile_.getChar(
         accentInput_.key, accentInput_.is_capital, accentInput_.index)};
