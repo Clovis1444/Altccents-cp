@@ -13,9 +13,10 @@ class AltccentsLinux : public QObject {
     explicit AltccentsLinux(AltccentsApp* parent);
 
    private slots:
-    void onCharSendRequested(Key key, QChar symbol);
+    static void onCharSendRequested(Key, QChar symbol);
 
    private:
     static bool isProgramInstalled(const QString& p_name);
+    static QString getXdotoolKeyArg(QChar symbol);
 };
 }  // namespace Altccents

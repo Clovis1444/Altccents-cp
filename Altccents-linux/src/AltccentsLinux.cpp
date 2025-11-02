@@ -14,7 +14,7 @@ AltccentsLinux::AltccentsLinux(AltccentsApp* parent) : QObject{parent} {
                      &AltccentsLinux::onCharSendRequested);
 }
 
-void AltccentsLinux::onCharSendRequested(Key key, QChar symbol) {
+void AltccentsLinux::onCharSendRequested(Key, QChar symbol) {
     if (symbol.isNull()) {
         qCritical().noquote()
             << __PRETTY_FUNCTION__ << "[ERROR]: invalid symbol to type";
@@ -44,11 +44,9 @@ void AltccentsLinux::onCharSendRequested(Key key, QChar symbol) {
 
         QProcess p{};
         p.setProgram(p_name);
-        // TODO(clovis): seems like without delay events sometimes do not
-        // reach destination
-        // TODO(clovis): without --clearmodifiers upper case only symbols sends
-        // in lower case
-        p.setArguments({"type", "--delay", "50", symbol});
+        // TODO(clovis): xdotool sometimes silently fails()
+        p.setArguments({"key", "--clearmodifiers", "--delay", "50",
+                        getXdotoolKeyArg(symbol)});
         p.start();
         qInfo().noquote() << __PRETTY_FUNCTION__ << "[INFO]: running "
                           << p.program() << p.arguments().join(" ");
@@ -77,5 +75,12 @@ bool AltccentsLinux::isProgramInstalled(const QString& p_name) {
     p.waitForFinished();
 
     return p.exitCode() == 0;
+}
+
+QString AltccentsLinux::getXdotoolKeyArg(QChar symbol) {
+    QString arg{symbol.isUpper() ? "Shift+U%1" : "U%1"};
+    arg = arg.arg(symbol.unicode(), 4, 16, QChar{'0'}).toUpper();
+
+    return arg;
 }
 }  // namespace Altccents
