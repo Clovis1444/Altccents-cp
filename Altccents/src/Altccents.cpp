@@ -481,6 +481,11 @@ void AltccentsApp::popup() {
         QList<Key> keys{activeAccentProfile_.accents().keys()};
 
         if (keys.isEmpty()) {
+            if (Settings::get(Settings::kOneShotMode).toBool()) {
+                // Use QApplication::exit() does not work for some reason
+                std::exit(1);
+                // QApplication::exit(1);
+            }
             return;
         }
 
