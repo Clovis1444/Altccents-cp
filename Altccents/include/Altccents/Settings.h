@@ -21,22 +21,27 @@ class Settings {
 
 #ifdef __linux__
     inline static const QString kSettingsDir{QDir::home().absolutePath() +
-                                             "/.config/" +
-                                             kProgramName.toLower() + '/'};
-// TODO(clovis)
+                                             "/.config/" + kProgramName + '/'};
+    inline static const QString kResourcesDir{"/usr/share/" + kProgramName +
+                                              "/resources/"};
+    inline static const QString kUserResourcesDir{QDir::home().absolutePath() +
+                                                  "/.local/share" +
+                                                  kProgramName + "/resources/"};
+// TODO(clovis): define for windows
 #elifdef _WIN32
     inline static const QString kSettingsDir{""};
-// TODO(clovis)
+    inline static const QString kResourcesDir{"%ProgramFiles%\\" +
+                                              kProgramName + "\\resources\\"};
+    inline static const QString kUserResourcesDir{"%APPDATA%\\" + kProgramName +
+                                                  "\\resources\\"};
+// TODO(clovis): define for other platforms
 #else
-    inline static const QString kSettingsDir{""};
+    // inline static const QString kSettingsDir{""};
+    // inline static const QString kResourcesDir{""};
+    // inline static const QString kUserResourcesDir{""};
 #endif
 
     inline static const QString kAccentProfileDir{kSettingsDir + "profiles/"};
-    // TODO(clovis)
-    // TODO(clovis): when QApplication::applicationDirPath() called -
-    // QApplication is not yet created
-    inline static const QString kResourcesDir{
-        QApplication::applicationDirPath() + "resources/"};
 
     inline static const QString kSettingsFileName{"settings.ini"};
     inline static const QString kSettingsFilePath{kSettingsDir +
