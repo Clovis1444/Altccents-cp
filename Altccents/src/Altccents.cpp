@@ -85,12 +85,20 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     return profiles;
 }
 
-AltccentsApp::AltccentsApp() : popup_{new Popup{}} {
+AltccentsApp::AltccentsApp(const QApplication& qapp) {
+    // Preprocess args before doing anything
+    argManager_.process(qapp);
+
     // Without this line the program will close after closing message box
     QApplication::setQuitOnLastWindowClosed(false);
     // Accent Profiles MUST be loaded before config
     loadAccentProfiles();
     loadConfig();
+
+    // Do main arg processing to override config options
+    argManager_.process(qapp);
+
+    popup_ = new Popup{};
 
     // Popup signals
     QObject::connect(popup_, &Popup::hidden, this,

@@ -4,10 +4,11 @@
 #include "Altccents/AltccentsLinux.h"
 
 int main(int argc, char** argv) {
-    QApplication a{argc, argv};
+    QApplication app{argc, argv};
 
-    Altccents::AltccentsApp* altccents{new Altccents::AltccentsApp{}};
+    Altccents::AltccentsApp* altccents{new Altccents::AltccentsApp{app}};
     Altccents::AltccentsLinux altccents_linux{altccents};
+
     altccents->popup();
 
     return QApplication::exec();

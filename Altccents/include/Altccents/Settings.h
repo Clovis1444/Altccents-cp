@@ -10,6 +10,14 @@ namespace Altccents {
 class Settings {
    public:
     inline static const QString kProgramName{"Altccents"};
+    inline static const QString kProgramVersion{PROJECT_VERSION};
+    inline static const QString kProgramSite{
+        "https://github.com/Clovis1444/Altccents-cp"};
+    inline static const QString kProgramDesc{
+        kProgramName +
+        " - is a simple utility for typing accented characters.\nFor more info "
+        "see " +
+        kProgramSite + '.'};
 
 #ifdef __linux__
     inline static const QString kSettingsDir{QDir::home().absolutePath() +

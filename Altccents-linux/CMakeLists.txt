@@ -6,7 +6,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/include/Altccents/AltccentsLinux.h
 ${CMAKE_CURRENT_SOURCE_DIR}/src/AltccentsLinux.cpp
 )
 
-
 target_include_directories(Altccents-linux PRIVATE include)
 
 # Note: Use PRIVATE to use lib as private dep

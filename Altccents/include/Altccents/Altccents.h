@@ -6,6 +6,7 @@
 #include <QString>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
+#include "Altccents/ArgManager/ArgManager.h"
 #include "Altccents/Popup.h"
 #include "Altccents/Settings.h"
 
@@ -16,7 +17,7 @@ class AltccentsApp : public QObject {
     Q_OBJECT
 
    public:
-    AltccentsApp();
+    explicit AltccentsApp(const QApplication& qapp);
     ~AltccentsApp() override;
 
     bool loadAccentProfiles(const QString& dir = Settings::kAccentProfileDir);
@@ -101,6 +102,7 @@ class AltccentsApp : public QObject {
     };
 
     AccentInput accentInput_{};
+    ArgManager argManager_;
 };  // AltccentsApp
 
 constexpr AltccentsApp::updateTrayFlag operator|(
