@@ -9,7 +9,7 @@
 #include <QScreen>
 #include <QtGlobal>
 
-#include "Altccents/Altccents.h"
+#include "Altccents/Settings.h"
 
 namespace Altccents {
 Popup::Popup(QWidget* parent) : QWidget{parent} {
@@ -58,8 +58,8 @@ void Popup::show(const QList<QChar>& chars, unsigned int active_char,
     // Position
     QRect screen_geometry{QApplication::primaryScreen()->availableGeometry()};
 
-    double x_pos{Settings::get(Settings::kPopupX).toDouble()};
-    double y_pos{Settings::get(Settings::kPopupY).toDouble()};
+    double x_pos{qBound(0.0, Settings::get(Settings::kPopupX).toDouble(), 1.0)};
+    double y_pos{qBound(0.0, Settings::get(Settings::kPopupY).toDouble(), 1.0)};
 
     int x{static_cast<int>((screen_geometry.width() - width()) * x_pos)};
     int y{static_cast<int>((screen_geometry.height() - height()) * y_pos)};
