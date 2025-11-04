@@ -95,8 +95,8 @@ AltccentsApp::AltccentsApp(const QApplication& qapp) {
     loadAccentProfiles();
     loadConfig();
 
-    // Do main arg processing to override config options
-    argManager_.process(qapp);
+    // Do arg handling to override config options
+    argManager_.handleArgs();
 
     popup_ = new Popup{};
 

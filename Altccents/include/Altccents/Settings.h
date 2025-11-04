@@ -1,3 +1,5 @@
+#pragma once
+
 #include <QtWidgets/qapplication.h>
 
 #include <QDir>
@@ -154,15 +156,7 @@ class Settings {
     }
 
     static QVariant get(SettingsType s) {
-        // Runtime asserts
-        if (s == SettingsType::kEnumLength) {
-            qFatal() << "Altccents::Settings::get() [FATAL]: wrong "
-                        "SettingsType enum value!";
-        };
-        if (SettingsType::kEnumLength != settings_.count()) {
-            qFatal() << "Altccents::Settings::get() [FATAL]: setting_.count() "
-                        "and SettingsType enum length does not match!";
-        };
+        settingAssert(s);
 
         // Always launch app on one shot mod on linux
 #ifdef __linux__
@@ -180,15 +174,7 @@ class Settings {
     }
 
     static void set(SettingsType s, const QVariant& val = {}) {
-        // Runtime asserts
-        if (s == SettingsType::kEnumLength) {
-            qFatal() << "Altccents::Settings::set() [FATAL]: wrong "
-                        "SettingsType enum value!";
-        };
-        if (SettingsType::kEnumLength != settings_.count()) {
-            qFatal() << "Altccents::Settings::set() [FATAL]: setting_.count() "
-                        "and SettingsType enum length does not match!";
-        };
+        settingAssert(s);
 
         // Type check
         if (val.metaType() != settings_[s].def_val.metaType()) {
@@ -218,9 +204,43 @@ class Settings {
         }
     }
 
+    static QString getKey(SettingsType s) {
+        settingAssert(s);
+
+        return settings_[s].key;
+    }
+    static QString getDesc(SettingsType s) {
+        settingAssert(s);
+
+        return settings_[s].desc;
+    }
+    static QString getTypeName(SettingsType s) {
+        settingAssert(s);
+
+        return settings_[s].def_val.typeName();
+    }
+    static QMetaType getMetaType(SettingsType s) {
+        settingAssert(s);
+
+        return settings_[s].def_val.metaType();
+    }
+
    private:
+    static void settingAssert(SettingsType s) {
+        // Runtime asserts
+        if (s == SettingsType::kEnumLength) {
+            qFatal() << "Altccents::Settings::get() [FATAL]: wrong "
+                        "SettingsType enum value!";
+        };
+        if (SettingsType::kEnumLength != settings_.count()) {
+            qFatal() << "Altccents::Settings::get() [FATAL]: setting_.count() "
+                        "and SettingsType enum length does not match!";
+        };
+    }
+
     struct SettingEntry {
         QString key;
+        QString desc;
         QVariant def_val;
         QVariant val;
     };
@@ -232,66 +252,145 @@ class Settings {
     // - key and def_val MUST not be changed
     inline static QHash<SettingsType, SettingEntry> settings_{
         // [0..1]: 0 - center left; 1 - center right
-        {kPopupX, {.key{"Popup/popup_x"}, .def_val{0.5}, .val{}}},
+        {kPopupX,
+         {.key{"Popup/popup_x"},
+          .desc{"Popup relative x pos [0..1]."},
+          .def_val{0.5},
+          .val{}}},
         // [0..1]: 0 - center up; 1 - center bottom
-        {kPopupY, {.key{"Popup/popup_y"}, .def_val{0.9}, .val{}}},
+        {kPopupY,
+         {.key{"Popup/popup_y"},
+          .desc{"Popup relative y pos [0..1]."},
+          .def_val{0.9},
+          .val{}}},
         // [0..1]: 0 - transparent; 1 - opaque
-        {kPopupOpacity, {.key{"Popup/popup_opacity"}, .def_val{0.9}, .val{}}},
-        {kPopupMargins, {.key{"Popup/popup_margins"}, .def_val{10}, .val{}}},
+        {kPopupOpacity,
+         {.key{"Popup/popup_opacity"},
+          .desc{"Popup opacity [0..1]."},
+          .def_val{0.9},
+          .val{}}},
+        {kPopupMargins,
+         {.key{"Popup/popup_margins"},
+          .desc{"Margins between char boxes."},
+          .def_val{10},
+          .val{}}},
         {kPopupTabMargins,
-         {.key{"Popup/popup_tab_margins"}, .def_val{1}, .val{}}},
-        {kCharBoxSize, {.key{"Popup/char_box_size"}, .def_val{100}, .val{}}},
-        {kPopupTabSize, {.key{"Popup/popup_tab_size"}, .def_val{50}, .val{}}},
+         {.key{"Popup/popup_tab_margins"},
+          .desc{"Margins between tabs."},
+          .def_val{1},
+          .val{}}},
+        {kCharBoxSize,
+         {.key{"Popup/char_box_size"},
+          .desc{"Char box size."},
+          .def_val{100},
+          .val{}}},
+        {kPopupTabSize,
+         {.key{"Popup/popup_tab_size"},
+          .desc{"Tab size."},
+          .def_val{50},
+          .val{}}},
         {kPopupBackgorundColor,
          {.key{"Popup/popup_background_color"},
+          .desc{"Popup background color."},
           .def_val{QColor{"#181825"}},
           .val{}}},
         {kCharBoxColor,
-         {.key{"Popup/char_box_color"}, .def_val{QColor{"#313244"}}, .val{}}},
+         {.key{"Popup/char_box_color"},
+          .desc{"Char box color."},
+          .def_val{QColor{"#313244"}},
+          .val{}}},
         {kCharBoxActiveColor,
          {.key{"Popup/char_box_active_color"},
+          .desc{"Selected char box color."},
           .def_val{QColor{"#585b70"}},
           .val{}}},
         // [0..100]: 0 - no rounding; 100 - circle rounding
         {kPopupRounding,
-         {.key{"Popup/popup_rounding"}, .def_val{0.35}, .val{}}},
+         {.key{"Popup/popup_rounding"},
+          .desc{"Percentage rounding for popup elements [0..100]."},
+          .def_val{0.35},
+          .val{}}},
         {kPopupBorderWidth,
-         {.key{"Popup/popup_border_width"}, .def_val{3}, .val{}}},
+         {.key{"Popup/popup_border_width"},
+          .desc{"Popup border width."},
+          .def_val{3},
+          .val{}}},
         {kPopupBorderColor,
          {.key{"Popup/popup_border_color"},
+          .desc{"Popup border color."},
           .def_val{QColor{"#cba6f7"}},
           .val{}}},
         {kCharBoxBorderColor,
          {.key{"Popup/char_box_border_color"},
+          .desc{"Char box border color."},
           .def_val{QColor{"#89b4fa"}},
           .val{}}},
         {kCharBoxActiveBorderColor,
          {.key{"Popup/char_box_border_active_color"},
+          .desc{"Selected char box border color."},
           .def_val{QColor{"#b4befe"}},
           .val{}}},
         {kPopupFontColor,
-         {.key{"Popup/popup_font_color"}, .def_val{QColor{"#eba0ac"}}, .val{}}},
+         {.key{"Popup/popup_font_color"},
+          .desc{"Popup font color."},
+          .def_val{QColor{"#eba0ac"}},
+          .val{}}},
         {kPopupActiveFontColor,
          {.key{"Popup/popup_active_font_color"},
+          .desc{"Popup selected font color."},
           .def_val{QColor{"#a6e3a1"}},
           .val{}}},
         {kPopupFontFamily,
-         {.key{"Popup/popup_font_family"}, .def_val{QString{}}, .val{}}},
+         {.key{"Popup/popup_font_family"},
+          .desc{"Popup font family."},
+          .def_val{QString{}},
+          .val{}}},
         {kPopupFontPointSize,
-         {.key{"Popup/popup_font_point_size"}, .def_val{50}, .val{}}},
+         {.key{"Popup/popup_font_point_size"},
+          .desc{"Popup font size."},
+          .def_val{50},
+          .val{}}},
         {kPopupTabFontPointSize,
-         {.key{"Popup/popup_tab_font_point_size"}, .def_val{25}, .val{}}},
+         {.key{"Popup/popup_tab_font_point_size"},
+          .desc{"Popup tab font size."},
+          .def_val{25},
+          .val{}}},
         {kPopupFontWeight,
-         {.key{"Popup/popup_font_weight"}, .def_val{-1}, .val{}}},
+         {.key{"Popup/popup_font_weight"},
+          .desc{"Popup font weight."},
+          .def_val{-1},
+          .val{}}},
         {kPopupFontItalic,
-         {.key{"Popup/popup_font_italic"}, .def_val{false}, .val{}}},
+         {.key{"Popup/popup_font_italic"},
+          .desc{"Use italic font for for popup."},
+          .def_val{false},
+          .val{}}},
         {kActiveProfile,
-         {.key{"Cache/active_profile"}, .def_val{QString{}}, .val{}}},
-        {kProgramState, {.key{"Cache/program_state"}, .def_val{true}, .val{}}},
-        {kSaveCache, {.key{"Cache/save_cache"}, .def_val{true}, .val{}}},
-        {kControlKey, {.key{"General/control_key"}, .def_val{77}, .val{}}},
+         {.key{"Cache/active_profile"},
+          .desc{"Set active profile."},
+          .def_val{QString{}},
+          .val{}}},
+        {kProgramState,
+         {.key{"Cache/program_state"},
+          .desc{"Set program state."},
+          .def_val{true},
+          .val{}}},
+        {kSaveCache,
+         {.key{"Cache/save_cache"},
+          .desc{
+              "Set whether the cache will be saved after closing the program."},
+          .def_val{true},
+          .val{}}},
+        {kControlKey,
+         {.key{"General/control_key"},
+          .desc{"Define 'control' key."},
+          .def_val{77},
+          .val{}}},
         {kOneShotMode,
-         {.key{"General/one_shot_mode"}, .def_val{false}, .val{}}},
+         {.key{"General/one_shot_mode"},
+          .desc{"Start program in OneShot mode."},
+          .def_val{false},
+          .val{}}},
         //
     };
 };
