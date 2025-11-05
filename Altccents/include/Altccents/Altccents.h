@@ -13,6 +13,8 @@
 namespace Altccents {
 QList<AccentProfile> readAccentProfiles(const QString& dir);
 
+bool isAlreadyRunning();
+
 class AltccentsApp : public QObject {
     Q_OBJECT
 

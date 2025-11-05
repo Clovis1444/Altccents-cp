@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QList>
 #include <QMenu>
+#include <QSharedMemory>
 #include <QSystemTrayIcon>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
@@ -83,6 +84,16 @@ QList<AccentProfile> readAccentProfiles(const QString& dir_path) {
     }
 
     return profiles;
+}
+
+bool isAlreadyRunning() {
+    QString shared_memory_key{Settings::kProgramName};
+
+    // Shared memory may not be clean up correctly on crash?
+    static QSharedMemory shared_memory{shared_memory_key};
+
+    // create() returns false if the memory is already created
+    return !shared_memory.create(1, QSharedMemory::ReadOnly);
 }
 
 AltccentsApp::AltccentsApp(const QApplication& qapp) {
