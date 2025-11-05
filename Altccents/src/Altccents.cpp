@@ -13,6 +13,7 @@
 #include <QSystemTrayIcon>
 
 #include "Altccents/AccentProfile/AccentProfile.h"
+#include "Altccents/Settings.h"
 
 // PRIVATE
 namespace {
@@ -159,7 +160,10 @@ AltccentsApp::~AltccentsApp() {
     delete trayMenu_;
     delete popup_;
 
-    writeCacheToFile();
+    // Save Cache if not in OneShot mode
+    if (!Settings::get(Settings::kOneShotMode).toBool()) {
+        writeCacheToFile();
+    }
 
     QObject::~QObject();
 };
