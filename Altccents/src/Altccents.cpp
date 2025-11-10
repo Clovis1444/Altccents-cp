@@ -126,8 +126,9 @@ AltccentsApp::AltccentsApp(const QApplication& qapp) {
     QObject::connect(popup_, &Popup::capitalChanged, this,
                      &AltccentsApp::onPopupCapitalChanged);
 
-    // If running in one shot mode - do not create tray icon
+    // If running in one shot mode - do not create tray icon; do popup
     if (Settings::get(Settings::kOneShotMode).toBool()) {
+        popup();
         return;
     }
 
