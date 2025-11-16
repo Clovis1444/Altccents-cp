@@ -18,6 +18,4 @@ int main(int argc, char** argv) {
     Altccents::AltccentsLinux altccents_linux{altccents};
 
     return QApplication::exec();
-
-    return 0;
 }
