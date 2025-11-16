@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.5.0)
 
 qt_add_executable(Altccents-linux 
 ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
@@ -14,3 +14,5 @@ Qt6::Core
 Qt6::Widgets
 Altccents
 )
+
+# TODO(clovis): add linuxdeployqt custom command here

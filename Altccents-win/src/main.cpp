@@ -1,4 +1,4 @@
-#include <qapplication.h>
+#include <QApplication>
 
 #include "Altccents/Altccents.h"
 

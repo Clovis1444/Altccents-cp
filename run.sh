@@ -1,33 +1,28 @@
-#!/bin/bash
-# This script builds project and runs it
-#
-# Args:
-# --target:<value>       [OPTIONAL]        build selected target
-# --build:<value>        [OPTIONAL]        set build dir
+# !bash
+# This script builds the project in debug build and runs it
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 cd "$SCRIPT_DIR" || exit 1
 
-BUILD_DIR="./build"
-TARGET="/Altccents-linux/Altccents-linux"
-RUN_TARGET=${BUILD_DIR}${TARGET}
-# USE_SUDO="sudo"
+BUILD_DIR="./build/"
+LINUX_TARGET="Altccents-linux"
+WIN_TARGET="Altccents-win.exe"
+TARGET=""
 
-SET_TARGET=""
-SET_BUILD_DIR=""
-for arg in "$@"; do
-    if [[ $arg == --target:* ]]; then
-        SET_TARGET="$arg"
-        TARGET="${arg#--target:}"
-    fi
-    if [[ $arg == --build:* ]]; then
-        SET_BUILD_DIR="$arg"
-        BUILD_DIR="${arg#--build:}"
-    fi
-done
+if [ "$1" ]; then # Manually set target
+    TARGET=${BUILD_DIR}${1}
+else # Determine target through determining OS
+    case "$(uname -s)" in
+        Linux*)   TARGET=${BUILD_DIR}${LINUX_TARGET} ;;
+        MINGW*|MSYS*|CYGWIN*) TARGET=${BUILD_DIR}${WIN_TARGET} ;;
+        *)       echo "Failed to determine target. You may pass target name as first argument." && exit 1 ;;
+    esac
+fi
+
+echo ${TARGET}
 
 # Build
-./build.sh ${SET_TARGET} ${SET_BUILD_DIR} || exit 1
+./build.sh || (echo "Build failed!" && exit 1)
 
 # Run
-${USE_SUDO} ${RUN_TARGET} || exit 1
+echo "Running ${TARGET} ..." && ${TARGET} || (echo "Failed to run ${TARGET}" && exit 1)

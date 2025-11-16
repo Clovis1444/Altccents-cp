@@ -1,28 +1,26 @@
-#!/bin/bash
-# This script builds project
-#
-# Args:
-# --target:<value>       [OPTIONAL]        build selected target
-# --build:<value>        [OPTIONAL]        set build dir
+# !bash
+# This script builds the project
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 cd "$SCRIPT_DIR" || exit 1
 
 BUILD_DIR='./build'
-# Uncomment if using C in your project
-# C_C='-DCMAKE_C_COMPILER=clang'
-CXX_C='-DCMAKE_CXX_COMPILER=clang++'
-BUILD_GEN="-G Ninja"
+BUILD_GEN="Ninja"
+BILD_TYPE="Debug" # Debug build by default
 
-TARGET=""
-for arg in "$@"; do
-    if [[ $arg == --target:* ]]; then
-        TARGET="--target ${arg#--target:}"
-    fi
-    if [[ $arg == --build:* ]]; then
-        BUILD_DIR="${arg#--build:}"
-    fi
-done
+# Check if the user passed "release" as an argument
+if [ "$1" = "release" ]; then
+    BUILD_TYPE="Release"
+elif [ "$1" = "debug" ]; then
+    BUILD_TYPE="Debug"
+else
+    echo "Usage: $0 [debug|release]"
+    echo "Defaulting to Debug build."
+fi
 
-cmake -S . -B ${BUILD_DIR} ${C_C} ${CXX_C} ${BUILD_GEN} || exit 1
-cmake --build ${BUILD_DIR} ${TARGET} || exit 1
+# Clean and recreate build directory (optional)
+# rm -rf "${BUILD_DIR}" && mkdir -p "${BUILD_DIR}"
+# Configure
+cmake -S . -B "${BUILD_DIR}" -G "${BUILD_GEN}" -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" || exit 1
+# Build
+cmake --build "${BUILD_DIR}" || exit 1
