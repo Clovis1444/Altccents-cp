@@ -22,7 +22,7 @@ fi
 echo ${TARGET}
 
 # Build
-./build.sh || (echo "Build failed!" && exit 1)
+./build.sh || exit 1
 
 # Run
-echo "Running ${TARGET} ..." && ${TARGET} || (echo "Failed to run ${TARGET}" && exit 1)
+echo "Running ${TARGET} ..." && ${TARGET} || exit 1
