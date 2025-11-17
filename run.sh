@@ -5,7 +5,7 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 cd "$SCRIPT_DIR" || exit 1
 
 BUILD_DIR="./build/"
-LINUX_TARGET="Altccents-linux"
+LINUX_TARGET="Altccents-linux/Altccents-linux"
 WIN_TARGET="Altccents-win.exe"
 TARGET=""
 
