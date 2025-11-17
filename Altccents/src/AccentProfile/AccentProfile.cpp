@@ -34,7 +34,7 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
         return;
     }
 
-    QJsonArray json_profile{json["AccentProfile"].toArray()};
+    const QJsonArray& json_profile{json[kJsonAccentProfileKey].toArray()};
 
     for (const auto& i : json_profile) {
         if (!i.isObject()) {
@@ -73,8 +73,8 @@ AccentProfile::AccentProfile(const QByteArray& data, const QFileInfo& fileInfo)
         }
 
         // Lower and Upper
-        QJsonArray lower{obj[kJsonLowerKey].toArray()};
-        QJsonArray upper{obj[kJsonUpperKey].toArray()};
+        const QJsonArray& lower{obj[kJsonLowerKey].toArray()};
+        const QJsonArray& upper{obj[kJsonUpperKey].toArray()};
 
         // Check IF lower and upper is the same size OR one is empty and other
         // is not empty

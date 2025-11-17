@@ -181,7 +181,7 @@ bool AltccentsApp::loadAccentProfiles(const QString& dir) {
     loadedAccentProfiles_ = profiles;
 
     // If found loaded profile with the same accents as active - update active
-    // else - set emtpy as active profile
+    // else - set first profile as active profile
     bool found_active_profile{};
     for (const AccentProfile& i : loadedAccentProfiles_) {
         if (i.accents() == activeAccentProfile_.accents()) {
@@ -191,7 +191,7 @@ bool AltccentsApp::loadAccentProfiles(const QString& dir) {
         }
     }
     if (!found_active_profile) {
-        setActiveProfile();
+        setActiveProfile(profiles[0]);
     }
 
     updateTray();
