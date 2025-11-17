@@ -19,10 +19,10 @@ Popup::Popup(QWidget* parent) : QWidget{parent} {
     setWindowFlag(Qt::Popup);
     // Enable click through the window to other apps
     setWindowFlag(Qt::WindowTransparentForInput);
-    // setWindowFlag(Qt::WindowDoesNotAcceptFocus);
+    // Disable shadows
+    setWindowFlag(Qt::NoDropShadowWindowHint);
 
     setAttribute(Qt::WA_TranslucentBackground);
-    // setAttribute(Qt::WA_NoSystemBackground);
 }
 
 void Popup::show(const QList<QChar>& chars, unsigned int active_char,

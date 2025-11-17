@@ -343,7 +343,7 @@ class Settings {
         {kPopupFontFamily,
          {.key{"Popup/popup_font_family"},
           .desc{"Popup font family."},
-          .def_val{QString{}},
+          .def_val{QString{"Comic Sans MS"}},
           .val{}}},
         {kPopupFontPointSize,
          {.key{"Popup/popup_font_point_size"},
