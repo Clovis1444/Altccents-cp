@@ -11,6 +11,7 @@ target_link_libraries(Altccents-win PRIVATE
   Altccents
 )
 
+# TODO(clovis): deploy resources here
 add_custom_command(
   TARGET Altccents-win POST_BUILD
   COMMENT "Deploying Qt dependencies with windeployqt"

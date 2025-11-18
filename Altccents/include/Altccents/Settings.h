@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QtWidgets/qapplication.h>
-
+#include <QApplication>
 #include <QDir>
 #include <QHash>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QString>
 #include <QVariant>
 
@@ -22,26 +22,23 @@ class Settings {
         kProgramSite + '.'};
 
 #ifdef __linux__
+    // TODO(clovis): implement this using QStandardPaths::ConfigLocation
     inline static const QString kSettingsDir{QDir::home().absolutePath() +
                                              "/.config/" + kProgramName + '/'};
-    inline static const QString kResourcesDir{"/usr/share/" + kProgramName +
-                                              "/resources/"};
-    inline static const QString kUserResourcesDir{QDir::home().absolutePath() +
-                                                  "/.local/share" +
-                                                  kProgramName + "/resources/"};
-// TODO(clovis): define for windows
 #elifdef _WIN32
-    inline static const QString kSettingsDir{""};
-    inline static const QString kResourcesDir{"%ProgramFiles%\\" +
-                                              kProgramName + "\\resources\\"};
-    inline static const QString kUserResourcesDir{"%APPDATA%\\" + kProgramName +
-                                                  "\\resources\\"};
+    inline static const QString kSettingsDir{
+        QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) +
+        '/' + kProgramName + '/'};
 // TODO(clovis): define for other platforms
 #else
     // inline static const QString kSettingsDir{""};
     // inline static const QString kResourcesDir{""};
-    // inline static const QString kUserResourcesDir{""};
 #endif
+
+    // TODO(clovis): test on linux
+    static QString resourcesDir() {
+        return QApplication::applicationDirPath() + "/resources/";
+    }
 
     inline static const QString kAccentProfileDir{kSettingsDir + "profiles/"};
 
@@ -49,9 +46,10 @@ class Settings {
     inline static const QString kSettingsFilePath{kSettingsDir +
                                                   kSettingsFileName};
 
-    inline static const QString kLogoFilePath{kResourcesDir + "logo128.png"};
-    inline static const QString kLogoOnFilePath{kResourcesDir +
-                                                "logo128_on.png"};
+    static QString logoFilePath() { return resourcesDir() + "logo128.png"; }
+    static QString logoOffFilePath() {
+        return resourcesDir() + "logo128_off.png";
+    }
 
     inline static const QList<Qt::Key> kNextAccentKeys{Qt::Key_K,
                                                        Qt::Key_Right};

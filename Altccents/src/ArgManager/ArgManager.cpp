@@ -35,6 +35,8 @@ ArgManager::ArgManager() {
 
         arg_opts_.insert(s, opt);
     }
+
+    // TODO(clovis): add print_paths arg
 }
 
 void ArgManager::handleArgs() {

@@ -315,8 +315,14 @@ void AltccentsApp::updateTrayIcon() {
         return;
     }
 
-    tray_->setIcon(QIcon{programState_ ? Settings::kLogoOnFilePath
-                                       : Settings::kLogoFilePath});
+    QIcon tray_icon{programState_ ? Settings::logoFilePath()
+                                  : Settings::logoOffFilePath()};
+    // Fallback icon if no icons were found in file system
+    if (tray_icon.isNull()) {
+        tray_icon = QIcon::fromTheme(QIcon::ThemeIcon::InsertImage);
+    }
+
+    tray_->setIcon(tray_icon);
 }
 
 void AltccentsApp::updateTrayMenu() {
