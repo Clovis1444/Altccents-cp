@@ -11,12 +11,14 @@ target_link_libraries(Altccents-win PRIVATE
   Altccents
 )
 
-# TODO(clovis): deploy resources here
 add_custom_command(
   TARGET Altccents-win POST_BUILD
-  COMMENT "Deploying Qt dependencies with windeployqt"
-  # windeployqt must be in PATH
-  COMMAND powershell -Command windeployqt "$<TARGET_FILE:Altccents-win>"
+  COMMENT "Deploy Qt dependencies and resources dir into build"
+  # Deploy qt dependencies; windeployqt must be in PATH
+  COMMAND powershell -Command "windeployqt '$<TARGET_FILE:Altccents-win>'"
+  # Deploy resources dir
+  COMMAND powershell -Command "if (Test-Path '$<TARGET_FILE_DIR:Altccents-win>/resources/') { Remove-Item '$<TARGET_FILE_DIR:Altccents-win>/resources/' -Recurse -Force }"
+  COMMAND powershell -Command "Copy-Item '${PROJECT_SOURCE_DIR}/resources' -Destination '$<TARGET_FILE_DIR:Altccents-win>/resources' -Recurse -Force"
 )
 
 # If Release build type - deploy project into build/release dir

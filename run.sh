@@ -25,4 +25,5 @@ echo ${TARGET}
 ./build.sh || exit 1
 
 # Run
+echo
 echo "Running ${TARGET} ..." && ${TARGET} || exit 1
