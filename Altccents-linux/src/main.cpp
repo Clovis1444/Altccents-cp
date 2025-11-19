@@ -2,7 +2,6 @@
 
 #include "Altccents/Altccents.h"
 #include "Altccents/AltccentsLinux.h"
-#include "Altccents/Settings.h"
 
 int main(int argc, char** argv) {
     if (Altccents::isAlreadyRunning()) {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qstandardpaths.h>
+
 #include <QApplication>
 #include <QDir>
 #include <QHash>
@@ -22,9 +24,9 @@ class Settings {
         kProgramSite + '.'};
 
 #ifdef __linux__
-    // TODO(clovis): implement this using QStandardPaths::ConfigLocation
-    inline static const QString kSettingsDir{QDir::home().absolutePath() +
-                                             "/.config/" + kProgramName + '/'};
+    inline static const QString kSettingsDir{
+        QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + '/' +
+        kProgramName + '/'};
 #elifdef _WIN32
     inline static const QString kSettingsDir{
         QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) +
@@ -35,7 +37,6 @@ class Settings {
     // inline static const QString kResourcesDir{""};
 #endif
 
-    // TODO(clovis): test on linux
     static QString resourcesDir() {
         return QApplication::applicationDirPath() + "/resources/";
     }
