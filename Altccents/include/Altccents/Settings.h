@@ -47,10 +47,8 @@ class Settings {
     inline static const QString kSettingsFilePath{kSettingsDir +
                                                   kSettingsFileName};
 
-    static QString logoFilePath() { return resourcesDir() + "logo128.png"; }
-    static QString logoOffFilePath() {
-        return resourcesDir() + "logo128_off.png";
-    }
+    static QString logoFilePath() { return resourcesDir() + "logo.png"; }
+    static QString logoOffFilePath() { return resourcesDir() + "logo_off.png"; }
 
     inline static const QList<Qt::Key> kNextAccentKeys{Qt::Key_K,
                                                        Qt::Key_Right};
