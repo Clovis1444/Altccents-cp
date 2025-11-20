@@ -2,6 +2,8 @@
 
 #include <QApplication>
 
+#include "Altccents/Settings.h"
+
 namespace Altccents {
 ArgManager::ArgManager() {
     QApplication::setApplicationName(Settings::kProgramName);
@@ -11,9 +13,10 @@ ArgManager::ArgManager() {
     addHelpOption();
     addVersionOption();
 
-    QCommandLineOption sus_opt{QList<QString>{"s", "sus"}, "My sus option"};
-    sus_opt.setValueName("float");
-    addOption(sus_opt);
+    // Add opts from print_exit_opts_ here
+    for (const auto& i : print_exit_opts_.keys()) {
+        addOption(QCommandLineOption{i.first, i.second});
+    }
 
     // Setup args from Settings.h
     for (int i{}; i < Settings::SettingsType::kEnumLength; ++i) {
@@ -33,14 +36,12 @@ ArgManager::ArgManager() {
                                Settings::getTypeName(s)};
         addOption(opt);
 
-        arg_opts_.insert(s, opt);
+        settings_opts_.insert(s, opt);
     }
-
-    // TODO(clovis): add print_paths arg
 }
 
-void ArgManager::handleArgs() {
-    for (auto i{arg_opts_.begin()}; i != arg_opts_.end(); ++i) {
+void ArgManager::handleSettingsArgs() {
+    for (auto i{settings_opts_.begin()}; i != settings_opts_.end(); ++i) {
         if (isSet(*i)) {
             QVariant val{value(*i)};
             QMetaType m_type{Settings::getMetaType(i.key())};
@@ -56,5 +57,38 @@ void ArgManager::handleArgs() {
             Settings::set(i.key(), val);
         }
     }
+}
+void ArgManager::handlePrintExitArgs() {
+    for (auto i{print_exit_opts_.constBegin()}; i != print_exit_opts_.cend();
+         ++i) {
+        if (isSet(i.key().first)) {
+            // Call corresponding function
+            i.value()();
+
+            // QApplication::quit() does not work here
+            std::exit(0);
+        }
+    }
+}
+
+void ArgManager::printPaths() {
+    qInfo().noquote() << "Program dir: "
+                      << QApplication::applicationDirPath() + '/';
+    qInfo().noquote() << "Resources dir: " << Settings::resourcesDir();
+    qInfo().noquote() << "Settings dir: " << Settings::kSettingsDir;
+    qInfo().noquote() << "Settings file: " << Settings::kSettingsFilePath;
+    qInfo().noquote() << "Profiles dir: " << Settings::kAccentProfileDir;
+}
+void ArgManager::printSettingsFile() {
+    QFile file{Settings::kSettingsFilePath};
+
+    if (file.open(QFile::ReadOnly | QFile::Text)) {
+        qInfo().noquote().nospace() << Settings::kSettingsFilePath << ':';
+
+        qInfo().noquote() << file.readAll();
+    } else {
+        qInfo().noquote() << "Failed to open " << Settings::kSettingsFilePath;
+    }
+    file.close();
 }
 }  // namespace Altccents

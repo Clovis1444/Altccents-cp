@@ -101,6 +101,9 @@ AltccentsApp::AltccentsApp(const QApplication& qapp) {
     // Preprocess args before doing anything
     argManager_.process(qapp);
 
+    // Handle args that supposed to close app after beign handled
+    argManager_.handlePrintExitArgs();
+
     // Without this line the program will close after closing message box
     QApplication::setQuitOnLastWindowClosed(false);
     // Accent Profiles MUST be loaded before config
@@ -108,7 +111,7 @@ AltccentsApp::AltccentsApp(const QApplication& qapp) {
     loadConfig();
 
     // Do arg handling to override config options
-    argManager_.handleArgs();
+    argManager_.handleSettingsArgs();
 
     popup_ = new Popup{};
 
