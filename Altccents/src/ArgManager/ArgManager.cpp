@@ -84,11 +84,11 @@ void ArgManager::printSettingsFile() {
 
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         qInfo().noquote().nospace() << Settings::kSettingsFilePath << ':';
-
         qInfo().noquote() << file.readAll();
     } else {
         qInfo().noquote() << "Failed to open " << Settings::kSettingsFilePath;
     }
+
     file.close();
 }
 }  // namespace Altccents
