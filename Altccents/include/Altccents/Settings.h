@@ -1,7 +1,5 @@
 #pragma once
 
-#include <qstandardpaths.h>
-
 #include <QApplication>
 #include <QDir>
 #include <QHash>
@@ -14,9 +12,9 @@
 namespace Altccents {
 class Settings {
    public:
-    inline static const QString kProgramName{"Altccents"};
+    inline static const QString kProgramName{PROGRAM_NAME};
     inline static const QString kProgramVersion{PROJECT_VERSION};
-    inline static const QString kProgramOrgName{"Clovis1444"};
+    inline static const QString kProgramOrgName{ORG_NAME};
     inline static const QString kProgramSite{
         "https://github.com/Clovis1444/Altccents-cp"};
     inline static const QString kProgramDesc{

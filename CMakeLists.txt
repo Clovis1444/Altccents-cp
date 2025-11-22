@@ -15,17 +15,26 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
 qt_standard_project_setup()
 
+# Define project metadata
+set(COMPANY_NAME "Clovis1444")
+set(FILE_DESC "Simple utility for typing accented characters")
+set(PRODUCT_NAME "Altccents")
+set(FILE_ICON "${PROJECT_SOURCE_DIR}/resources/icon.ico")
+string(TIMESTAMP CURRENT_YEAR "%Y")
+set(COPYRIGHT "Copyright (c) ${CURRENT_YEAR} ${COMPANY_NAME}")
+
+
 # Application library
 add_subdirectory(Altccents)
 
 # Platform specific actions
 if(WIN32)
-    # Application Executable
-    add_subdirectory(Altccents-win)
+  # Application Executable
+  add_subdirectory(Altccents-win)
 elseif(APPLE)
-    # Add executable here
+  # Add executable here
 elseif(UNIX AND NOT APPLE)
-    add_subdirectory(Altccents-linux)
+  add_subdirectory(Altccents-linux)
 else()
-    message(STATUS "UNKNOWN OS")
+  message(STATUS "UNKNOWN OS")
 endif()

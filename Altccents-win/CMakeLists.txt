@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 3.5.0)
 
+# Configure version.rc
+configure_file(
+  ${PROJECT_SOURCE_DIR}/version.rc.in
+  ${PROJECT_SOURCE_DIR}/version.rc
+  @ONLY
+)
+
 add_executable(Altccents-win
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${PROJECT_SOURCE_DIR}/version.rc
 )
 
 # Note: Use PRIVATE to use lib as private dep
@@ -23,10 +31,10 @@ add_custom_command(
 
 # If Release build type - deploy project into release dir
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(RELEASE_DIR "$<TARGET_FILE_DIR:Altccents-win>/release/")
-    set(T_RELEASE_DIR "$<TARGET_FILE_DIR:Altccents-win>/release/Altccents-win/")
+  set(RELEASE_DIR "$<TARGET_FILE_DIR:Altccents-win>/release/")
+  set(T_RELEASE_DIR "$<TARGET_FILE_DIR:Altccents-win>/release/Altccents-win/")
 
-    add_custom_command(
+  add_custom_command(
     TARGET Altccents-win POST_BUILD
     COMMENT "Deploy project into release dir"
     # Remove release dir if it already exists
