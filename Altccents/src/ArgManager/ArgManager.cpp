@@ -6,9 +6,6 @@
 
 namespace Altccents {
 ArgManager::ArgManager() {
-    QApplication::setApplicationName(Settings::kProgramName);
-    QApplication::setApplicationVersion(Settings::kProgramVersion);
-
     setApplicationDescription(Settings::kProgramDesc);
     addHelpOption();
     addVersionOption();

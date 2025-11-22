@@ -98,6 +98,17 @@ bool isAlreadyRunning() {
 }
 
 AltccentsApp::AltccentsApp(const QApplication& qapp) {
+    // Set app metadata
+    QApplication::setApplicationName(Settings::kProgramName);
+    QApplication::setApplicationVersion(Settings::kProgramVersion);
+    QApplication::setOrganizationName(Settings::kProgramOrgName);
+    QApplication::setOrganizationDomain(Settings::kProgramSite);
+    QIcon app_icon{Settings::iconFilePath()};
+    if (app_icon.isNull()) {
+        app_icon = Settings::iconPlaceholder();
+    }
+    QApplication::setWindowIcon(app_icon);
+
     // Preprocess args before doing anything
     argManager_.process(qapp);
 
@@ -322,7 +333,7 @@ void AltccentsApp::updateTrayIcon() {
                                   : Settings::logoOffFilePath()};
     // Fallback icon if no icons were found in file system
     if (tray_icon.isNull()) {
-        tray_icon = QIcon::fromTheme(QIcon::ThemeIcon::InsertImage);
+        tray_icon = Settings::logoPlaceholder();
     }
 
     tray_->setIcon(tray_icon);

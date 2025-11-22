@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QHash>
+#include <QIcon>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QString>
@@ -15,6 +16,7 @@ class Settings {
    public:
     inline static const QString kProgramName{"Altccents"};
     inline static const QString kProgramVersion{PROJECT_VERSION};
+    inline static const QString kProgramOrgName{"Clovis1444"};
     inline static const QString kProgramSite{
         "https://github.com/Clovis1444/Altccents-cp"};
     inline static const QString kProgramDesc{
@@ -47,8 +49,16 @@ class Settings {
     inline static const QString kSettingsFilePath{kSettingsDir +
                                                   kSettingsFileName};
 
+    static QString iconFilePath() { return resourcesDir() + "icon.png"; }
     static QString logoFilePath() { return resourcesDir() + "logo.png"; }
     static QString logoOffFilePath() { return resourcesDir() + "logo_off.png"; }
+
+    static QIcon iconPlaceholder() {
+        return QIcon::fromTheme(QIcon::ThemeIcon::InsertImage);
+    }
+    static QIcon logoPlaceholder() {
+        return QIcon::fromTheme(QIcon::ThemeIcon::InsertImage);
+    }
 
     inline static const QList<Qt::Key> kNextAccentKeys{Qt::Key_K,
                                                        Qt::Key_Right};

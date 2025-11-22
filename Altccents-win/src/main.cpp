@@ -11,7 +11,6 @@ int main(int argc, char** argv) {
     }
 
     QApplication app{argc, argv};
-    // TODO(clovis): set app metadata
     Altccents::AltccentsApp* altccents{new Altccents::AltccentsApp{app}};
 
     return QApplication::exec();
