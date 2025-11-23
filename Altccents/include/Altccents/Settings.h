@@ -389,7 +389,8 @@ class Settings {
         {kControlKey,
          {.key{"General/control_key"},
           .desc{"Define 'control' key."},
-          .def_val{77},
+          // ` key
+          .def_val{192},
           .val{}}},
         {kOneShotMode,
          {.key{"General/one_shot_mode"},
