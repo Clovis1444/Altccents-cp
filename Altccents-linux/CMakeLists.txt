@@ -46,10 +46,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # Copy resources dir to release dir
     COMMAND bash -c "cp -r '${PROJECT_SOURCE_DIR}/resources' '${T_RELEASE_DIR}/resources'"
     # Copy profiles dir to release dir
-    COMMAND bash -c "cp -r '${PROJECT_SOURCE_DIR}/profiles' '${T_RELEASE_DIR}/profiles'"
+    COMMAND bash -c "cp -r '${PROJECT_SOURCE_DIR}/profiles' '${RELEASE_DIR}/profiles'"
     # Deploy Qt dependencies to release dir; linuxdeployqt will fail on new systems
     COMMAND bash -c linuxdeployqt ${T_RELEASE_DIR}/'$<TARGET_FILE_NAME:Altccents-linux>' -always-overwrite || echo 'linuxdeployqt failed successfully!'
     # Deploy project into archive; 7z must be in PATH
-    COMMAND bash -c "7z a '${RELEASE_DIR}/Altccents-linux.zip' '${T_RELEASE_DIR}'"
+    COMMAND bash -c "7z a '${RELEASE_DIR}/Altccents-linux.zip' '${RELEASE_DIR}/*'"
   )
 endif()

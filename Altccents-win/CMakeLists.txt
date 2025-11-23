@@ -46,10 +46,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # Copy resources dir to release dir
     COMMAND powershell -Command "Copy-Item '${PROJECT_SOURCE_DIR}/resources' -Destination '${T_RELEASE_DIR}/resources' -Recurse -Force"
     # Copy profiles dir to release dir
-    COMMAND powershell -Command "Copy-Item '${PROJECT_SOURCE_DIR}/profiles' -Destination '${T_RELEASE_DIR}/profiles' -Recurse -Force"
+    COMMAND powershell -Command "Copy-Item '${PROJECT_SOURCE_DIR}/profiles' -Destination '${RELEASE_DIR}/profiles' -Recurse -Force"
     # Deploy Qt dependencies to release dir; windeployqt must be in PATH
     COMMAND powershell -Command "windeployqt ${T_RELEASE_DIR}/$<TARGET_FILE_NAME:Altccents-win>"
     # Deploy project into archive; 7z must be in PATH
-    COMMAND powershell -Command "7z a '${RELEASE_DIR}/Altccents-win.zip' '${T_RELEASE_DIR}'"
+    COMMAND powershell -Command "7z a '${RELEASE_DIR}/Altccents-win.zip' '${RELEASE_DIR}/*'"
   )
 endif()
