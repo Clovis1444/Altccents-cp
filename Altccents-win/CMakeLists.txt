@@ -10,7 +10,11 @@ configure_file(
 add_executable(Altccents-win
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
   ${PROJECT_SOURCE_DIR}/version.rc
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Altccents/AltccentsWin.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/AltccentsWin.cpp
 )
+
+target_include_directories(Altccents-win PRIVATE include)
 
 # Note: Use PRIVATE to use lib as private dep
 target_link_libraries(Altccents-win PRIVATE

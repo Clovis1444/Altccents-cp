@@ -1,6 +1,7 @@
 #include <QApplication>
 
 #include "Altccents/Altccents.h"
+#include "Altccents/AltccentsWin.h"
 
 int main(int argc, char** argv) {
     if (Altccents::isAlreadyRunning()) {
@@ -11,7 +12,9 @@ int main(int argc, char** argv) {
     }
 
     QApplication app{argc, argv};
+
     Altccents::AltccentsApp* altccents{new Altccents::AltccentsApp{app}};
+    Altccents::AltccentsWin altccents_win{altccents};
 
     return QApplication::exec();
 }
