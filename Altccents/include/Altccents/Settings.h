@@ -390,7 +390,7 @@ class Settings {
          {.key{"General/control_key"},
           .desc{"Define 'control' key."},
           // ` key
-          .def_val{192},
+          .def_val{0xc0},
           .val{}}},
         {kOneShotMode,
          {.key{"General/one_shot_mode"},

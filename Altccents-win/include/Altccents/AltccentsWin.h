@@ -22,7 +22,7 @@ class AltccentsWin : public QObject {
     bool setHook();
     void unsetHook();
 
-    AltccentsApp* altccents_;
+    inline static AltccentsApp* altccents_{};
     HHOOK hook_{};
 };
 }  // namespace Altccents

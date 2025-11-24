@@ -1,8 +1,10 @@
 #include "Altccents/AltccentsWin.h"
 
+#include <QElapsedTimer>
+
 namespace Altccents {
-AltccentsWin::AltccentsWin(AltccentsApp* parent)
-    : QObject{parent}, altccents_{parent} {
+AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
+    altccents_ = parent;
     if (!altccents_) {
         qCritical().noquote()
             << "AltccentsWin [ERROR]: "
@@ -21,17 +23,28 @@ AltccentsWin::~AltccentsWin() {
 
 LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
                                          LPARAM lparam) {
-    if (code >= 0) {
-        // TODO(clovis): use cast that does not emit warnings
+    if (code >= 0 && wparam == WM_KEYDOWN) {
+        // NOLINTNEXTLINE
         KBDLLHOOKSTRUCT* kb_struct{reinterpret_cast<KBDLLHOOKSTRUCT*>(lparam)};
 
-        if (wparam == WM_KEYDOWN) {
-            qInfo() << "HOOK:" << kb_struct->vkCode;
-        }
+        QElapsedTimer timer{};
+        timer.start();
+        bool is_accent_key{
+            altccents_->activeProfile().accents().keys().contains(
+                kb_struct->vkCode)};
+        bool is_control_key_down{
+            (GetAsyncKeyState(Settings::get(Settings::kControlKey).toInt()) &
+             0x8000) != 0};
+        // qInfo() << "Control key: " << is_control_key_down;
+        // qInfo() << "Accent key: " << is_accent_key;
+        // TODO(clovis): implement this using double tap? And change ControlKey
+        // to Hotkey
+        if (is_accent_key && is_control_key_down) {
+            auto time{timer.nsecsElapsed()};
+            qInfo() << "Elapsed time:" << time;
+            qInfo() << "Trigger popup here!";
 
-        // To discard events - return non zero instead of CallNexHookEx()
-        if (kb_struct->vkCode == VK_OEM_3) {
-            qInfo() << "HOOK:" << "Discarding ` key...";
+            // Discard
             return 1;
         }
     }

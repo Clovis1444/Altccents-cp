@@ -25,6 +25,7 @@ class Key {
     bool operator==(const Key& other) const {
         return keycode_ == other.keycode_;
     }
+    bool operator==(const uint32_t& other) const { return keycode_ == other; }
 
     // Returns -1 if an object is invalid
     int kc() const {
