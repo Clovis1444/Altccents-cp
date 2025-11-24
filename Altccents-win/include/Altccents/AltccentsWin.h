@@ -14,6 +14,7 @@ class AltccentsWin : public QObject {
     ~AltccentsWin() override;
 
    private slots:
+    void onProgramStateChanged(bool state);
 
    private:
     // SetWindowsHookEx() accepts only static or global functions
@@ -21,6 +22,8 @@ class AltccentsWin : public QObject {
     // Returns true on success
     bool setHook();
     void unsetHook();
+
+    static bool isKeyDown(int v_key);
 
     inline static AltccentsApp* altccents_{};
     HHOOK hook_{};

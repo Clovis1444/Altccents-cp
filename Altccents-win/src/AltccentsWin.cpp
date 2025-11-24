@@ -1,7 +1,5 @@
 #include "Altccents/AltccentsWin.h"
 
-#include <QElapsedTimer>
-
 namespace Altccents {
 AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
     altccents_ = parent;
@@ -12,37 +10,42 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
         std::exit(1);
     }
 
-    setHook();
+    if (altccents_->programState()) {
+        setHook();
+    }
 
-    qInfo() << "Hello from AltccentsWin";
+    // Connects
+    connect(altccents_, &AltccentsApp::programStateChanged, this,
+            &AltccentsWin::onProgramStateChanged);
 }
 AltccentsWin::~AltccentsWin() {
     unsetHook();
     QObject::~QObject();
 }
 
+void AltccentsWin::onProgramStateChanged(bool state) {
+    if (state) {
+        setHook();
+    } else {
+        unsetHook();
+    }
+}
+
+// TODO(clovis): add MODES: one-shot, hook, hotkey
 LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
                                          LPARAM lparam) {
-    if (code >= 0 && wparam == WM_KEYDOWN) {
+    if (code >= 0 && (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN)) {
         // NOLINTNEXTLINE
         KBDLLHOOKSTRUCT* kb_struct{reinterpret_cast<KBDLLHOOKSTRUCT*>(lparam)};
 
-        QElapsedTimer timer{};
-        timer.start();
         bool is_accent_key{
             altccents_->activeProfile().accents().keys().contains(
                 kb_struct->vkCode)};
         bool is_control_key_down{
-            (GetAsyncKeyState(Settings::get(Settings::kControlKey).toInt()) &
-             0x8000) != 0};
-        // qInfo() << "Control key: " << is_control_key_down;
-        // qInfo() << "Accent key: " << is_accent_key;
-        // TODO(clovis): implement this using double tap? And change ControlKey
-        // to Hotkey
+            isKeyDown(Settings::get(Settings::kControlKey).toInt())};
         if (is_accent_key && is_control_key_down) {
-            auto time{timer.nsecsElapsed()};
-            qInfo() << "Elapsed time:" << time;
-            qInfo() << "Trigger popup here!";
+            qInfo() << "Trigger popup here! Key:" << kb_struct->vkCode;
+            altccents_->popup();
 
             // Discard
             return 1;
@@ -62,5 +65,17 @@ bool AltccentsWin::setHook() {
 
     return hook_ != nullptr;
 }
-void AltccentsWin::unsetHook() { UnhookWindowsHookEx(hook_); }
+void AltccentsWin::unsetHook() {
+    BOOL r{UnhookWindowsHookEx(hook_)};
+    if (r == 0) {
+        qWarning().noquote()
+            << "AltccentsWin [WARNING]: failed to UnhookWindowsHookEx()";
+    }
+
+    hook_ = nullptr;
+}
+
+bool AltccentsWin::isKeyDown(int v_key) {
+    return (GetAsyncKeyState(v_key) & 0x8000) != 0;
+}
 }  // namespace Altccents

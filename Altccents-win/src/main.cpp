@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
 
     QApplication app{argc, argv};
 
+    // TODO(clovis): fix segfault on program exit through Tray menu button
     Altccents::AltccentsApp* altccents{new Altccents::AltccentsApp{app}};
     Altccents::AltccentsWin altccents_win{altccents};
 

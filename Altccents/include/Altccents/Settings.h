@@ -389,8 +389,8 @@ class Settings {
         {kControlKey,
          {.key{"General/control_key"},
           .desc{"Define 'control' key."},
-          // ` key
-          .def_val{0xc0},
+          // Alt key
+          .def_val{0x12},
           .val{}}},
         {kOneShotMode,
          {.key{"General/one_shot_mode"},
