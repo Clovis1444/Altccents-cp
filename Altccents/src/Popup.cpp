@@ -18,11 +18,17 @@ Popup::Popup(QWidget* parent) : QWidget{parent} {
     // Make the window not appear in taskbar
     setWindowFlag(Qt::Popup);
     // Enable click through the window to other apps
-    setWindowFlag(Qt::WindowTransparentForInput);
+    // setWindowFlag(Qt::WindowTransparentForInput);
     // Disable shadows
     setWindowFlag(Qt::NoDropShadowWindowHint);
 
     setAttribute(Qt::WA_TranslucentBackground);
+
+    // TODO(clovis): fix exit when in one_shot_mode
+    // IMPORTANT: Do this BULLSHIT to resolve qt auto focus issue
+    setFocus();
+    QWidget::show();
+    hide();
 }
 
 void Popup::show(const QList<QChar>& chars, unsigned int active_char,
