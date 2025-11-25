@@ -21,6 +21,9 @@ class Key {
 
         keycode_ = keycode;
     }
+    // NOLINTNEXTLINE
+    constexpr explicit Key(const unsigned long& keycode)
+        : Key{static_cast<int>(keycode)} {}
 
     bool operator==(const Key& other) const {
         return keycode_ == other.keycode_;

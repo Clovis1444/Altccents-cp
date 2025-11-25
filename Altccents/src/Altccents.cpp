@@ -323,7 +323,16 @@ void AltccentsApp::inputTabNext(bool forward) {
     accentInput_.key = new_key;
     accentInput_.index = 0;
 }
+void AltccentsApp::inputSetKey(Key key) {
+    if (!activeProfile().contains(key)) {
+        return;
+    }
 
+    if (accentInput_.key != key) {
+        accentInput_.index = 0;
+    }
+    accentInput_.key = key;
+}
 void AltccentsApp::updateTrayIcon() {
     if (!tray_) {
         return;
@@ -513,7 +522,7 @@ void AltccentsApp::setSaveCache(bool val) {
 }
 
 void AltccentsApp::popup() {
-    if (popup_->isHidden() || accentInput_.isEmpty()) {
+    if (accentInput_.isEmpty()) {
         QList<Key> keys{activeAccentProfile_.accents().keys()};
 
         if (keys.isEmpty()) {
@@ -541,6 +550,13 @@ void AltccentsApp::popup() {
 
     popup_->show(chars, static_cast<unsigned int>(accentInput_.index),
                  tab_list.first, tab_list.second);
+}
+bool AltccentsApp::isPopupOpen() const {
+    if (!popup_) {
+        return false;
+    }
+
+    return popup_->isVisible();
 }
 
 QPair<QList<QChar>, unsigned int> AltccentsApp::tabsFromAccentInput() const {

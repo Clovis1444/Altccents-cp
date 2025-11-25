@@ -34,7 +34,8 @@ void AltccentsWin::onProgramStateChanged(bool state) {
 // TODO(clovis): add MODES: one-shot, hook, hotkey
 LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
                                          LPARAM lparam) {
-    if (code >= 0 && (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN)) {
+    if (code >= 0 && (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN) &&
+        !altccents_->isPopupOpen()) {
         // NOLINTNEXTLINE
         KBDLLHOOKSTRUCT* kb_struct{reinterpret_cast<KBDLLHOOKSTRUCT*>(lparam)};
 
@@ -44,7 +45,7 @@ LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
         bool is_control_key_down{
             isKeyDown(Settings::get(Settings::kControlKey).toInt())};
         if (is_accent_key && is_control_key_down) {
-            qInfo() << "Trigger popup here! Key:" << kb_struct->vkCode;
+            altccents_->inputSetKey(Key{kb_struct->vkCode});
             altccents_->popup();
 
             // Discard

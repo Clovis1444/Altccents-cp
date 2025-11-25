@@ -39,6 +39,7 @@ class AltccentsApp : public QObject {
 
     void inputAccentNext(bool forward = true);
     void inputTabNext(bool forward = true);
+    void inputSetKey(Key key);
 
     void updateTrayIcon();
     void updateTrayMenu();
@@ -65,6 +66,7 @@ class AltccentsApp : public QObject {
 
     void popup();
     WId popupWId() const { return popup_ ? popup_->winId() : 0; }
+    bool isPopupOpen() const;
 
     // Returns <Tab titles list, active tab index>
     QPair<QList<QChar>, unsigned int> tabsFromAccentInput() const;
