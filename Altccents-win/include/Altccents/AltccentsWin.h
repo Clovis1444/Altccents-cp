@@ -19,13 +19,13 @@ class AltccentsWin : public QObject {
    private:
     // SetWindowsHookEx() accepts only static or global functions
     static LRESULT CALLBACK hook_proc(int code, WPARAM wparam, LPARAM lparam);
-    // Returns true on success
+    // Returns true on success; Returns false and do nothing in OneShotMode
     bool setHook();
     void unsetHook();
 
     static bool isKeyDown(int v_key);
 
     inline static AltccentsApp* altccents_{};
-    HHOOK hook_{};
+    HHOOK hook_{nullptr};
 };
 }  // namespace Altccents

@@ -53,6 +53,11 @@ LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
     return CallNextHookEx(nullptr, code, wparam, lparam);
 }
 bool AltccentsWin::setHook() {
+    // Do nothing in OneShotMode
+    if (Settings::get(Settings::kOneShotMode).toBool()) {
+        return false;
+    }
+
     hook_ =
         SetWindowsHookEx(WH_KEYBOARD_LL, &AltccentsWin::hook_proc, nullptr, 0);
 
@@ -64,6 +69,11 @@ bool AltccentsWin::setHook() {
     return hook_ != nullptr;
 }
 void AltccentsWin::unsetHook() {
+    // Do nothing in OneShotMode
+    if (Settings::get(Settings::kOneShotMode).toBool() && hook_ == nullptr) {
+        return;
+    }
+
     BOOL r{UnhookWindowsHookEx(hook_)};
     if (r == 0) {
         qWarning().noquote()
