@@ -595,6 +595,7 @@ void AltccentsApp::onPopupHidden() {
 void AltccentsApp::onPopupAccentChosen() {
     QChar accent_to_send{activeAccentProfile_.getChar(
         accentInput_.key, accentInput_.is_capital, accentInput_.index)};
+    Key key{accentInput_.key};
 
     if (accent_to_send.isNull()) {
         popup_->hide();
@@ -602,7 +603,7 @@ void AltccentsApp::onPopupAccentChosen() {
     }
 
     popup_->hide();
-    emit charSendRequested(accentInput_.key, accent_to_send);
+    emit charSendRequested(key, accent_to_send);
 }
 void AltccentsApp::onPopupAccentCopyChosen() {
     QChar accent_to_copy{activeAccentProfile_.getChar(

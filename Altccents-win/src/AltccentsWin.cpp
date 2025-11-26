@@ -17,6 +17,8 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
     // Connects
     connect(altccents_, &AltccentsApp::programStateChanged, this,
             &AltccentsWin::onProgramStateChanged);
+    QObject::connect(parent, &AltccentsApp::charSendRequested, this,
+                     &AltccentsWin::onCharSendRequested);
 }
 AltccentsWin::~AltccentsWin() { unsetHook(); }
 
@@ -26,6 +28,9 @@ void AltccentsWin::onProgramStateChanged(bool state) {
     } else {
         unsetHook();
     }
+}
+void AltccentsWin::onCharSendRequested(Key, QChar symbol) {
+    sendKeyInput(symbol);
 }
 
 // TODO(clovis): add MODES: one-shot, hook, hotkey
@@ -85,5 +90,32 @@ void AltccentsWin::unsetHook() {
 
 bool AltccentsWin::isKeyDown(int v_key) {
     return (GetAsyncKeyState(v_key) & 0x8000) != 0;
+}
+
+void AltccentsWin::sendKeyInput(QChar ch) {
+    INPUT input[2]{};
+    // KEY DOWN
+    input[0].type = INPUT_KEYBOARD;
+    input[0].ki.dwFlags = KEYEVENTF_UNICODE;
+    input[0].ki.wVk = 0;
+    input[0].ki.wScan = ch.unicode();
+    // KEY UP
+    input[1].type = INPUT_KEYBOARD;
+    input[1].ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
+    input[1].ki.wVk = 0;
+    input[1].ki.wScan = ch.unicode();
+
+    // Send input to foreground window
+    UINT result{SendInput(2, input, sizeof(INPUT))};
+
+    if (result != 2) {
+        qWarning().noquote() << "AltccentsWin [WARNING]: failed to SendInput()";
+    }
+}
+
+QString AltccentsWin::getWindowTitle(HWND window) {
+    wchar_t w_title[256];
+    GetWindowTextW(window, w_title, 256);
+    return QString::fromWCharArray(w_title);
 }
 }  // namespace Altccents

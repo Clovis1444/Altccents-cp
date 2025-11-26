@@ -15,6 +15,7 @@ class AltccentsWin : public QObject {
 
    private slots:
     void onProgramStateChanged(bool state);
+    static void onCharSendRequested(Key, QChar symbol);
 
    private:
     // SetWindowsHookEx() accepts only static or global functions
@@ -24,6 +25,10 @@ class AltccentsWin : public QObject {
     void unsetHook();
 
     static bool isKeyDown(int v_key);
+
+    static void sendKeyInput(QChar ch);
+
+    static QString getWindowTitle(HWND window);
 
     inline static AltccentsApp* altccents_{};
     HHOOK hook_{nullptr};
