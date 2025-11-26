@@ -24,11 +24,13 @@ Popup::Popup(QWidget* parent) : QWidget{parent} {
 
     setAttribute(Qt::WA_TranslucentBackground);
 
-    // TODO(clovis): fix exit when in one_shot_mode
-    // IMPORTANT: Do this BULLSHIT to resolve qt auto focus issue
-    setFocus();
-    QWidget::show();
-    hide();
+    // IMPORTANT: Do this UGLY BULLSHIT to resolve qt auto focus issue
+    if (!Settings::get(Settings::kOneShotMode).toBool()) {
+        // Do NOT execute the following lines in OneShotMode
+        setFocus();
+        QWidget::show();
+        hide();
+    }
 }
 
 void Popup::show(const QList<QChar>& chars, unsigned int active_char,
