@@ -18,10 +18,7 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
     connect(altccents_, &AltccentsApp::programStateChanged, this,
             &AltccentsWin::onProgramStateChanged);
 }
-AltccentsWin::~AltccentsWin() {
-    unsetHook();
-    QObject::~QObject();
-}
+AltccentsWin::~AltccentsWin() { unsetHook(); }
 
 void AltccentsWin::onProgramStateChanged(bool state) {
     if (state) {

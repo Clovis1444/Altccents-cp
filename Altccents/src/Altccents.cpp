@@ -179,8 +179,6 @@ AltccentsApp::~AltccentsApp() {
     if (!Settings::get(Settings::kOneShotMode).toBool()) {
         writeCacheToFile();
     }
-
-    QObject::~QObject();
 };
 
 bool AltccentsApp::loadAccentProfiles(const QString& dir) {

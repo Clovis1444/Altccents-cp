@@ -13,8 +13,8 @@ int main(int argc, char** argv) {
 
     QApplication app{argc, argv};
 
-    Altccents::AltccentsApp* altccents{new Altccents::AltccentsApp{app}};
-    Altccents::AltccentsLinux altccents_linux{altccents};
+    Altccents::AltccentsApp altccents{app};
+    Altccents::AltccentsLinux altccents_linux{&altccents};
 
     return QApplication::exec();
 }
