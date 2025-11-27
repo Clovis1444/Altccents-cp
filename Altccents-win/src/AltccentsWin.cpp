@@ -10,6 +10,9 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
         std::exit(1);
     }
 
+    // Setup HotkeyManager
+    hotkey_manager_ = new HotkeyManager{};
+    // Setup hook
     if (altccents_->programState()) {
         setHook();
     }
@@ -20,7 +23,10 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
     QObject::connect(parent, &AltccentsApp::charSendRequested, this,
                      &AltccentsWin::onCharSendRequested);
 }
-AltccentsWin::~AltccentsWin() { unsetHook(); }
+AltccentsWin::~AltccentsWin() {
+    unsetHook();
+    delete hotkey_manager_;
+}
 
 void AltccentsWin::onProgramStateChanged(bool state) {
     if (state) {

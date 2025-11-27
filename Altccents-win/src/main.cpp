@@ -11,6 +11,8 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    qInfo() << "Main thread:" << QThread::currentThreadId();
+
     QApplication app{argc, argv};
 
     Altccents::AltccentsApp altccents{app};

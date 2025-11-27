@@ -5,6 +5,7 @@
 #include <QObject>
 
 #include "Altccents/Altccents.h"
+#include "Altccents/HotkeyManager.h"
 
 namespace Altccents {
 class AltccentsWin : public QObject {
@@ -32,5 +33,6 @@ class AltccentsWin : public QObject {
 
     inline static AltccentsApp* altccents_{};
     HHOOK hook_{nullptr};
+    HotkeyManager* hotkey_manager_;
 };
 }  // namespace Altccents

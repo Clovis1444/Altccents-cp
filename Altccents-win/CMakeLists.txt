@@ -12,6 +12,8 @@ add_executable(Altccents-win
   ${PROJECT_SOURCE_DIR}/version.rc
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Altccents/AltccentsWin.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AltccentsWin.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Altccents/HotkeyManager.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/HotkeyManager.cpp
 )
 
 target_include_directories(Altccents-win PRIVATE include)
