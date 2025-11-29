@@ -207,7 +207,6 @@ class Settings : public QObject {
         switch (s) {
             case kHotkey: {
                 if (old_val != val) {
-                    qInfo() << "EMIT hotkeyChanged";
                     emit instance().hotkeyChanged();
                 }
                 break;
@@ -420,19 +419,19 @@ class Settings : public QObject {
           .def_val{true},
           .val{}}},
         {kControlKey,
-         {.key{"General/control_key"},
+         {.key{"App/control_key"},
           .desc{"Define 'control' key."},
           // Alt key
           .def_val{0x12},
           .val{}}},
         {kHotkey,
-         {.key{"General/hotkey"},
+         {.key{"App/hotkey"},
           .desc{"Define popup window hotkey."},
           // Alt key
           .def_val{"ctrl+alt+`"},
           .val{}}},
         {kOneShotMode,
-         {.key{"General/one_shot_mode"},
+         {.key{"App/one_shot_mode"},
           .desc{"Start program in OneShot mode."},
           .def_val{false},
           .val{}}},
