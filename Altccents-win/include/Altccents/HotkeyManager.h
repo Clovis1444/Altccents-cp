@@ -17,23 +17,28 @@ class HotkeyManager : public QObject {
     void hotkeyTriggered();
 
    public slots:
-    void updateHotkey();
+    void onSettingsHotkeyChanged();
 
    private:
+    void postLoopThreadMsg(UINT msg);
+
     void startMsgLoop();
     void stopMsgLoop();
 
     // [IMPORTANT]: All methods with postfix "_msg" should be called like this:
     // QMetaObject::invokeMethod(this, &HotkeyManager::<methode_name>);
+    // OR call them inside msgLoop_msg()
     void msgLoop_msg();
     static void setHotkey_msg();
     static void unsetHotkey_msg();
     //
 
     QThread msg_thread_{};
+    DWORD msgLoopThreadId_{};
     bool is_msg_loop_running_{};
 
     static constexpr int kHotkeyId{1444};
     static constexpr UINT kStopMsgLoopMsg{WM_USER + 1};
+    static constexpr UINT kUpdateHotkeyMsg{WM_USER + 2};
 };
 }  // namespace Altccents

@@ -2,38 +2,32 @@
 
 #include <QDebug>
 
+#include "Altccents/Settings.h"
+
 namespace Altccents {
 HotkeyManager::HotkeyManager() : QObject{nullptr} {
     moveToThread(&msg_thread_);
 
     msg_thread_.start();
 
-    updateHotkey();
+    startMsgLoop();
+
+    connect(&Settings::instance(), &Settings::hotkeyChanged, this,
+            &HotkeyManager::onSettingsHotkeyChanged, Qt::DirectConnection);
 }
 HotkeyManager::~HotkeyManager() {
     stopMsgLoop();
-
-    QMetaObject::invokeMethod(this, &HotkeyManager::unsetHotkey_msg,
-                              Qt::BlockingQueuedConnection);
 
     msg_thread_.quit();
     msg_thread_.wait();
 }
 
-// TODO(clovis): implement runtime update
-// There might be issues when calling this function second time. Need to check
-void HotkeyManager::updateHotkey() {
-    stopMsgLoop();
-
-    QMetaObject::invokeMethod(this, &HotkeyManager::unsetHotkey_msg);
-    QMetaObject::invokeMethod(this, &HotkeyManager::setHotkey_msg);
-
-    startMsgLoop();
+void HotkeyManager::onSettingsHotkeyChanged() {
+    postLoopThreadMsg(kUpdateHotkeyMsg);
 }
 
 // TODO(clovis): implement settings option
 void HotkeyManager::setHotkey_msg() {
-    qInfo() << "set_hotkey: " << QThread::currentThreadId();
     // Ctrl + Alt + tilde
     BOOL r = {
         RegisterHotKey(nullptr, kHotkeyId, MOD_CONTROL | MOD_ALT, VK_OEM_3)};
@@ -42,22 +36,34 @@ void HotkeyManager::setHotkey_msg() {
         qWarning() << "HotkeyManager [WARNING]: Failed to RegisterHotKey()";
     }
 }
-void HotkeyManager::unsetHotkey_msg() {
-    qInfo() << "unset_hotkey: " << QThread::currentThreadId();
-    UnregisterHotKey(nullptr, kHotkeyId);
-}
+void HotkeyManager::unsetHotkey_msg() { UnregisterHotKey(nullptr, kHotkeyId); }
 
 void HotkeyManager::msgLoop_msg() {
+    // Get msgLoop thread id
+    msgLoopThreadId_ = static_cast<DWORD>(
+        reinterpret_cast<DWORD_PTR>(msg_thread_.currentThreadId()));
+    // Initial hotkey setup
+    unsetHotkey_msg();
+    setHotkey_msg();
+    //
+
     MSG msg = {};
     while (GetMessage(&msg, nullptr, 0, 0) != 0) {
         switch (msg.message) {
             case WM_HOTKEY: {
-                qInfo() << "HOTKEY: " << QThread::currentThreadId();
+                qDebug() << "HOTKEY: " << QThread::currentThreadId();
                 emit hotkeyTriggered();
                 break;
             }
+            case kUpdateHotkeyMsg: {
+                qDebug() << "UPDATE HOTKEY: " << QThread::currentThreadId();
+                unsetHotkey_msg();
+                setHotkey_msg();
+                break;
+            }
             case kStopMsgLoopMsg: {
-                qInfo() << "HOTKEY QUIT: " << QThread::currentThreadId();
+                qDebug() << "HOTKEY QUIT: " << QThread::currentThreadId();
+                unsetHotkey_msg();
                 return;
             }
             default: {
@@ -79,8 +85,13 @@ void HotkeyManager::stopMsgLoop() {
         return;
     }
 
-    auto thread_id = reinterpret_cast<DWORD_PTR>(msg_thread_.currentThreadId());
-    PostThreadMessageW(static_cast<DWORD>(thread_id), kStopMsgLoopMsg, 0, 0);
+    postLoopThreadMsg(kStopMsgLoopMsg);
+
     is_msg_loop_running_ = false;
+}
+
+// NOLINTNEXTLINE
+void HotkeyManager::postLoopThreadMsg(UINT msg) {
+    PostThreadMessageW(msgLoopThreadId_, msg, 0, 0);
 }
 }  // namespace Altccents
