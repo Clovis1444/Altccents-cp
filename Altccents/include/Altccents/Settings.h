@@ -10,7 +10,9 @@
 #include <QVariant>
 
 namespace Altccents {
-class Settings {
+class Settings : public QObject {
+    Q_OBJECT
+
    public:
     inline static const QString kProgramName{PROGRAM_NAME};
     inline static const QString kProgramVersion{PROJECT_VERSION};
@@ -92,6 +94,7 @@ class Settings {
         kProgramState,
         kSaveCache,
         kControlKey,
+        kHotkey,
         kOneShotMode,
         // Insert new members here
         kEnumLength
@@ -136,27 +139,33 @@ class Settings {
     }
 
     static void loadSettings() {
+        // NOTE(clovis): not sure if this is necessary. Needs inspection.
         // Clear current settings vals
-        for (auto i : settings_) {
-            i.val = {};
-        }
+        // for (auto i : settings_) {
+        //     i.val = {};
+        // }
 
         QSettings settings{kSettingsFilePath, QSettings::IniFormat};
 
-        for (SettingEntry& i : settings_) {
-            QVariant new_val{settings.value(i.key)};
+        for (auto i{settings_.begin()}; i != settings_.end(); ++i) {
+            SettingEntry& s{*i};
+            QVariant new_val{settings.value(s.key)};
 
-            // If key value is an empty string - set val as def_val
+            // If key value is an empty string - set empty val
             if (new_val.toString().isEmpty()) {
-                i.val = i.def_val;
+                set(i.key());
                 continue;
             }
 
             // Cast value obtained from file to the def_val type
-            bool cast_result{new_val.convert(i.def_val.metaType())};
+            bool cast_result{new_val.convert(s.def_val.metaType())};
 
             // Set val
-            i.val = cast_result ? new_val : i.def_val;
+            if (cast_result) {
+                set(i.key(), new_val);
+            } else {
+                set(i.key());
+            }
         }
     }
 
@@ -178,8 +187,12 @@ class Settings {
                                                    : settings_[s].val;
     }
 
-    static void set(SettingsType s, const QVariant& val = {}) {
+    static void set(SettingsType s, QVariant val = {}) {
         settingAssert(s);
+
+        if (val.isNull()) {
+            val.convert(settings_[s].def_val.metaType());
+        }
 
         // Type check
         if (val.metaType() != settings_[s].def_val.metaType()) {
@@ -188,7 +201,20 @@ class Settings {
             return;
         }
 
+        QVariant old_val{settings_[s].val};
         settings_[s].val = val;
+
+        switch (s) {
+            case kHotkey: {
+                if (old_val != val) {
+                    qInfo() << "EMIT hotkeyChanged";
+                    emit instance().hotkeyChanged();
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     static void saveCache() {
@@ -229,6 +255,13 @@ class Settings {
 
         return settings_[s].def_val.metaType();
     }
+
+    static Settings& instance() {
+        static Settings instance;
+        return instance;
+    }
+   signals:
+    void hotkeyChanged();
 
    private:
     static void settingAssert(SettingsType s) {
@@ -392,6 +425,12 @@ class Settings {
           // Alt key
           .def_val{0x12},
           .val{}}},
+        {kHotkey,
+         {.key{"General/hotkey"},
+          .desc{"Define popup window hotkey."},
+          // Alt key
+          .def_val{"ctrl+alt+`"},
+          .val{}}},
         {kOneShotMode,
          {.key{"General/one_shot_mode"},
           .desc{"Start program in OneShot mode."},
@@ -399,5 +438,15 @@ class Settings {
           .val{}}},
         //
     };
+
+   public:
+    Settings(const Settings&) = delete;
+    Settings& operator=(const Settings&) = delete;
+    Settings(Settings&&) = delete;
+    Settings& operator=(Settings&&) = delete;
+
+   private:
+    Settings() = default;
+    ~Settings() override = default;
 };
 }  // namespace Altccents
