@@ -201,12 +201,12 @@ class Settings : public QObject {
             return;
         }
 
-        QVariant old_val{settings_[s].val};
+        QVariant old_val{get(s)};
         settings_[s].val = val;
 
         switch (s) {
             case kHotkey: {
-                if (old_val != val) {
+                if (old_val != get(s)) {
                     emit instance().hotkeyChanged();
                 }
                 break;
