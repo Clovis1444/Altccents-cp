@@ -17,6 +17,7 @@ class AltccentsWin : public QObject {
    private slots:
     void onProgramStateChanged(bool state);
     static void onCharSendRequested(Key, QChar symbol);
+    static void onHotkeyTriggered();
 
    private:
     // SetWindowsHookEx() accepts only static or global functions

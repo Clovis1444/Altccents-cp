@@ -1,7 +1,5 @@
 #include "Altccents/HotkeyManager.h"
 
-#include <QDebug>
-
 #include "Altccents/Settings.h"
 
 namespace Altccents {
@@ -51,18 +49,15 @@ void HotkeyManager::msgLoop_msg() {
     while (GetMessage(&msg, nullptr, 0, 0) != 0) {
         switch (msg.message) {
             case WM_HOTKEY: {
-                qDebug() << "HOTKEY: " << QThread::currentThreadId();
                 emit hotkeyTriggered();
                 break;
             }
             case kUpdateHotkeyMsg: {
-                qDebug() << "UPDATE HOTKEY: " << QThread::currentThreadId();
                 unsetHotkey_msg();
                 setHotkey_msg();
                 break;
             }
             case kStopMsgLoopMsg: {
-                qDebug() << "HOTKEY QUIT: " << QThread::currentThreadId();
                 unsetHotkey_msg();
                 return;
             }

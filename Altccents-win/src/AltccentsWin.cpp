@@ -20,8 +20,10 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
     // Connects
     connect(altccents_, &AltccentsApp::programStateChanged, this,
             &AltccentsWin::onProgramStateChanged);
-    QObject::connect(parent, &AltccentsApp::charSendRequested, this,
-                     &AltccentsWin::onCharSendRequested);
+    connect(parent, &AltccentsApp::charSendRequested, this,
+            &AltccentsWin::onCharSendRequested);
+    connect(hotkey_manager_, &HotkeyManager::hotkeyTriggered, this,
+            &AltccentsWin::onHotkeyTriggered);
 }
 AltccentsWin::~AltccentsWin() {
     unsetHook();
@@ -38,6 +40,7 @@ void AltccentsWin::onProgramStateChanged(bool state) {
 void AltccentsWin::onCharSendRequested(Key, QChar symbol) {
     sendKeyInput(symbol);
 }
+void AltccentsWin::onHotkeyTriggered() { altccents_->popup(); }
 
 // TODO(clovis): add MODES: one-shot, hook, hotkey
 LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
