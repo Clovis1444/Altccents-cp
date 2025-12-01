@@ -211,6 +211,10 @@ class Settings : public QObject {
                 }
                 break;
             }
+            case kControlKey: {
+                emit instance().controlKeyChanged();
+                break;
+            }
             default:
                 break;
         }
@@ -261,6 +265,7 @@ class Settings : public QObject {
     }
    signals:
     void hotkeyChanged();
+    void controlKeyChanged();
 
    private:
     static void settingAssert(SettingsType s) {
@@ -421,14 +426,13 @@ class Settings : public QObject {
         {kControlKey,
          {.key{"App/control_key"},
           .desc{"Define 'control' key."},
-          // Alt key
-          .def_val{0x12},
+          .def_val{"alt"},
           .val{}}},
         {kHotkey,
          {.key{"App/hotkey"},
+          // TODO(clovis): make proper desc
           .desc{"Define popup window hotkey."},
-          // Alt key
-          .def_val{"ctrl+alt+`"},
+          .def_val{"ctrl+alt+tilde"},
           .val{}}},
         {kOneShotMode,
          {.key{"App/one_shot_mode"},

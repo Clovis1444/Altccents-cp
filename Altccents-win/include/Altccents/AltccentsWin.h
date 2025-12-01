@@ -16,6 +16,7 @@ class AltccentsWin : public QObject {
 
    private slots:
     void onProgramStateChanged(bool state);
+    static void onControlKeyChanged();
     static void onCharSendRequested(Key, QChar symbol);
     static void onHotkeyTriggered();
 
@@ -33,7 +34,9 @@ class AltccentsWin : public QObject {
     static QString getWindowTitle(HWND window);
 
     inline static AltccentsApp* altccents_{};
+    inline static Key control_key_{};
     HHOOK hook_{nullptr};
     HotkeyManager* hotkey_manager_;
+
 };
 }  // namespace Altccents

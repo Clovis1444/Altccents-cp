@@ -1,5 +1,6 @@
 #include "Altccents/HotkeyManager.h"
 
+#include "Altccents/AccentProfile/AccentProfile.h"
 #include "Altccents/Settings.h"
 
 namespace Altccents {
@@ -26,9 +27,58 @@ void HotkeyManager::onSettingsHotkeyChanged() {
 
 // TODO(clovis): implement settings option
 void HotkeyManager::setHotkey_msg() {
-    // Ctrl + Alt + tilde
-    BOOL r = {
-        RegisterHotKey(nullptr, kHotkeyId, MOD_CONTROL | MOD_ALT, VK_OEM_3)};
+    // NOTE(clovis): fore more info see
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
+    QList<Key> keys{AccentProfile::keysFromString(
+        Settings::get(Settings::kHotkey).toString())};
+
+    if (keys.isEmpty()) {
+        qWarning() << "HotkeyManager [WARNING]: Failed to RegisterHotKey()";
+        return;
+    }
+
+    const QList<Key> mod_alt{Key{VK_MENU}, Key{VK_LMENU}, Key{VK_RMENU}};
+    const QList<Key> mod_ctrl{Key{VK_CONTROL}, Key{VK_LCONTROL},
+                              Key{VK_RCONTROL}};
+    const QList<Key> mod_shift{Key{VK_SHIFT}, Key{VK_LSHIFT}, Key{VK_RSHIFT}};
+    const QList<Key> mod_win{Key{VK_LWIN}, Key{VK_RWIN}};
+    // Check for modifiers and remove them from keys list
+    UINT modifiers{MOD_NOREPEAT};
+    for (auto i{keys.begin()}; i != keys.end();) {
+        // MOD_ALT
+        if (mod_alt.contains(*i)) {
+            modifiers |= MOD_ALT;
+            i = keys.erase(i);
+        }
+        // MOD_CONTROL
+        else if (mod_ctrl.contains(*i)) {
+            modifiers |= MOD_CONTROL;
+            i = keys.erase(i);
+        }
+        // MOD_SHIFT
+        else if (mod_shift.contains(*i)) {
+            modifiers |= MOD_SHIFT;
+            i = keys.erase(i);
+        }
+        // MOD_WIN
+        else if (mod_win.contains(*i)) {
+            modifiers |= MOD_WIN;
+            i = keys.erase(i);
+        } else {
+            ++i;
+        }
+    }
+
+    if (keys.isEmpty()) {
+        qWarning() << "HotkeyManager [WARNING]: Failed to RegisterHotKey()";
+        return;
+    }
+    // NOTE(clovis): use first remaining key
+    UINT hotkey_key{static_cast<UINT>(keys.first().kc())};
+
+    // Do hotkey registration
+    // NOTE(clovis): it is possible to register hotkey without modifiers
+    BOOL r = {RegisterHotKey(nullptr, kHotkeyId, modifiers, hotkey_key)};
 
     if (r == 0) {
         qWarning() << "HotkeyManager [WARNING]: Failed to RegisterHotKey()";

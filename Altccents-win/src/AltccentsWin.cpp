@@ -10,6 +10,8 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
         std::exit(1);
     }
 
+    // Initial control_key_ setup
+    onControlKeyChanged();
     // Setup HotkeyManager
     hotkey_manager_ = new HotkeyManager{};
     // Setup hook
@@ -20,6 +22,8 @@ AltccentsWin::AltccentsWin(AltccentsApp* parent) : QObject{parent} {
     // Connects
     connect(altccents_, &AltccentsApp::programStateChanged, this,
             &AltccentsWin::onProgramStateChanged);
+    connect(&Settings::instance(), &Settings::controlKeyChanged, this,
+            &AltccentsWin::onControlKeyChanged);
     connect(parent, &AltccentsApp::charSendRequested, this,
             &AltccentsWin::onCharSendRequested);
     connect(hotkey_manager_, &HotkeyManager::hotkeyTriggered, this,
@@ -37,6 +41,10 @@ void AltccentsWin::onProgramStateChanged(bool state) {
         unsetHook();
     }
 }
+void AltccentsWin::onControlKeyChanged() {
+    QString c_key_str{Settings::get(Settings::kControlKey).toString()};
+    control_key_ = AccentProfile::keyFromString(c_key_str);
+}
 void AltccentsWin::onCharSendRequested(Key, QChar symbol) {
     sendKeyInput(symbol);
 }
@@ -53,8 +61,7 @@ LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
         bool is_accent_key{
             altccents_->activeProfile().accents().keys().contains(
                 kb_struct->vkCode)};
-        bool is_control_key_down{
-            isKeyDown(Settings::get(Settings::kControlKey).toInt())};
+        bool is_control_key_down{isKeyDown(control_key_.kc())};
         if (is_accent_key && is_control_key_down) {
             altccents_->inputSetKey(Key{kb_struct->vkCode});
             altccents_->popup();
