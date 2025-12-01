@@ -212,4 +212,72 @@ QJsonDocument AccentProfile::toQJsonDocument() const {
     return json;
 };
 
+Key AccentProfile::keyFromString(const QString& key) {
+    // Step 1: check if str contains int
+    bool to_int_r{};
+    // Supports hex -> bin -> oct -> dec
+    int int_from_str{key.toInt(&to_int_r, 0)};
+    if (to_int_r) {
+        return Key{int_from_str};
+    }
+
+    // Step 2: try to convert str to int
+    if (kVkMap.contains(key.toLower())) {
+        return Key{kVkMap[key.toLower()]};
+    }
+
+    return {};
+}
+QList<Key> AccentProfile::keysFromString(QString keys) {
+    if (keys.isEmpty()) {
+        return {};
+    }
+
+    keys = keys.simplified().toLower().remove(' ');
+    QList<QString> str_list{keys.split('+', Qt::SkipEmptyParts).toList()};
+
+    QList<Key> key_list;
+    for (const auto& i : str_list) {
+        Key key{keyFromString(i)};
+        if (key != Key{}) {
+            key_list.push_back(key);
+        }
+    }
+
+    return key_list;
+}
+// TODO(clovis): create printKeys option
+void AccentProfile::printVkMap() {
+    QString first_col_name{"Key name"};
+    QString second_col_name{"Key value"};
+
+    // Determine max key length to align print output
+    qsizetype max_first_col_length{first_col_name.length()};
+    qsizetype max_second_col_length{second_col_name.length()};
+    for (auto i{kVkMap.begin()}; i != kVkMap.end(); ++i) {
+        if (max_first_col_length < i.key().length()) {
+            max_first_col_length = i.key().length();
+        }
+    }
+
+    // Print title
+    qInfo().noquote().nospace()
+        << first_col_name.leftJustified(max_first_col_length) << " | "
+        << second_col_name.leftJustified(max_second_col_length);
+    // Print separator
+    qInfo().noquote().nospace()
+        << QString{}.leftJustified(max_first_col_length, '-') << "-+-"
+        << QString{}.leftJustified(max_second_col_length, '-');
+    // Sort keys
+    QList<QString> keys{kVkMap.keys()};
+    std::sort(keys.begin(), keys.end(), [](const QString& a, const QString& b) {
+        return kVkMap[a] < kVkMap[b];
+    });
+    // Do print
+    for (const auto& i : keys) {
+        qInfo().noquote().nospace()
+            << i.leftJustified(max_first_col_length) << " | " << kVkMap[i];
+    }
+}
+
 };  // namespace Altccents
