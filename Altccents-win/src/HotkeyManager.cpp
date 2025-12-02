@@ -25,7 +25,6 @@ void HotkeyManager::onSettingsHotkeyChanged() {
     postLoopThreadMsg(kUpdateHotkeyMsg);
 }
 
-// TODO(clovis): implement settings option
 void HotkeyManager::setHotkey_msg() {
     // NOTE(clovis): fore more info see
     // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey

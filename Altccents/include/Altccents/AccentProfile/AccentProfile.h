@@ -113,14 +113,30 @@ class AccentProfile {
     inline static const QString kJsonUpperKey{"Upper"};
     inline static const QString kJsonAccentProfileExample{
         QString{R"(
+{
     "%1": [
          {
-             "%2": 123,
-             "%3": ["a", "b"],
-             "%4": ["A", "B"],
+             "%2": "A",
+             "%3": ["à", "ä", "â", "æ"],
+             "%4": ["À", "Ä", "Â", "Æ"]
          },
-         ...
+         {
+             "%2": 69,
+             "%3": ["è", "é", "ê", "ë"],
+             "%4": ["È", "É", "Ê", "Ë"]
+         },
+         {
+             "%2": "apostrophe",
+             "%3": ["€", "₽", "₿"],
+             "%4": []
+         },
+         {
+             "%2": "0xDC",
+             "%3": [],
+             "%4": ["⌀"]
+         }
     ]
+}
     )"}
             .arg(kJsonAccentProfileKey)
             .arg(kJsonKeyKey)

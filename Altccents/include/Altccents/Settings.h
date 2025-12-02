@@ -425,13 +425,16 @@ class Settings : public QObject {
           .val{}}},
         {kControlKey,
          {.key{"App/control_key"},
-          .desc{"Define 'control' key."},
+          .desc{"Define 'control' key. Example: \"alt\"."},
           .def_val{"alt"},
           .val{}}},
+        // TODO(clovis): add program toggle hotkey
         {kHotkey,
          {.key{"App/hotkey"},
-          // TODO(clovis): make proper desc
-          .desc{"Define popup window hotkey."},
+          .desc{"Define popup window hotkey."
+                "Supported modifiers: any "
+                "ctrl/alt/win/shift(may be combined). Example: "
+                "\"ctrl+alt+tilde\"."},
           .def_val{"ctrl+alt+tilde"},
           .val{}}},
         {kOneShotMode,

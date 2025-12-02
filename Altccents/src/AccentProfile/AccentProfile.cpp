@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <iostream>
 
 namespace {
 void critical(const QString& text) {
@@ -99,7 +100,10 @@ QByteArray AccentProfile::serialize(const AccentProfile& obj,
 bool AccentProfile::isEmpty() const { return accents_.isEmpty(); };
 
 void AccentProfile::printJsonAccentProfileExample() {
-    qInfo().noquote() << kJsonAccentProfileExample.trimmed();
+    qInfo().noquote() << "ExampleProfile.json:";
+    // NOTE(clovis): use std::cout here. qInfo() incorrectly prints
+    // accented symbols and some non standard ASCII symbols, for some reason
+    std::cout << kJsonAccentProfileExample.trimmed().toStdString() << std::endl;
 }
 
 void AccentProfile::print(const QJsonDocument::JsonFormat& format) const {
@@ -234,7 +238,6 @@ QList<Key> AccentProfile::keysFromString(QString keys) {
 
     return key_list;
 }
-// TODO(clovis): create printKeys option
 void AccentProfile::printVkMap() {
     QString first_col_name{"Key name"};
     QString second_col_name{"Key value"};
@@ -266,6 +269,9 @@ void AccentProfile::printVkMap() {
         qInfo().noquote().nospace()
             << i.leftJustified(max_first_col_length) << " | " << kVkMap[i];
     }
+    qInfo() << "\nFor all keys values see: "
+               "https://learn.microsoft.com/en-us/windows/win32/inputdev/"
+               "virtual-key-codes";
 }
 
 };  // namespace Altccents

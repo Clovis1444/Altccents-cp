@@ -4,6 +4,7 @@
 #include <QHash>
 #include <functional>
 
+#include "Altccents/AccentProfile/AccentProfile.h"
 #include "Altccents/Settings.h"
 
 namespace Altccents {
@@ -25,7 +26,13 @@ class ArgManager : public QCommandLineParser {
          []() { printPaths(); }},
         {{"print-settings", QString{"Prints content of %1 file."}.arg(
                                 Settings::kSettingsFileName)},
-         []() { printSettingsFile(); }}
+         []() { printSettingsFile(); }},
+        {{"print-keys",
+          "Prints list of all key names supported by the application."},
+         []() { AccentProfile::printVkMap(); }},
+        {{"print-profile-example",
+          "Prints example of Accent Profile json file."},
+         []() { AccentProfile::printJsonAccentProfileExample(); }},
         // Insert new args here
     };
 };

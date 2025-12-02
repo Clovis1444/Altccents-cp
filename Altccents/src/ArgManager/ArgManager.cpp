@@ -21,16 +21,30 @@ ArgManager::ArgManager() {
 
         QString key{Settings::getKey(s)};
 
-        // TODO(clovis): decide whether cache options should be ignored
+        // NOTE(clovis): ignore cache args
         if (key.startsWith("Cache/")) {
             continue;
         }
 
         qsizetype name_pos{key.lastIndexOf('/')};
         QString name{key.sliced(name_pos).remove('/')};
+        QString type_name{Settings::getTypeName(s)};
+        // Custom type name
+        switch (s) {
+            case Settings::kControlKey: {
+                type_name += "(KEY)";
+                break;
+            }
+            case Settings::kHotkey: {
+                type_name += "(MODIFIER_KEYS+KEY)";
+                break;
+            }
+            default: {
+                break;
+            }
+        }
 
-        QCommandLineOption opt{name, Settings::getDesc(s),
-                               Settings::getTypeName(s)};
+        QCommandLineOption opt{name, Settings::getDesc(s), type_name};
         addOption(opt);
 
         settings_opts_.insert(s, opt);
