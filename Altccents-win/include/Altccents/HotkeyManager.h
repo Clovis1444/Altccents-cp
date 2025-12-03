@@ -52,13 +52,13 @@ class HotkeyManager : public QObject {
     // NOTE(clovis): Hotkey.id MUST not be 0
     struct Hotkey {
         // Hotkey id for RegisterHotKey()
-        int id{};
+        int id;
         // Setting to get keys from
         Settings::SettingsType setting;
         // Ptr to a signal that Settings class emitting when setting is updated
         void (Settings::*setting_signal)();
         // Message that will be posted to MsgLoop when setting_signal is emited
-        UINT update_msg{};
+        UINT update_msg;
         // Signal that will be emited by HotkeyManager when hotkey is triggered
         std::function<void(HotkeyManager*)> signal;
     };

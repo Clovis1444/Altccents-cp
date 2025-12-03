@@ -50,8 +50,14 @@ void AltccentsWin::onControlKeyChanged() {
 void AltccentsWin::onCharSendRequested(Key, QChar symbol) {
     sendKeyInput(symbol);
 }
-void AltccentsWin::onPopupHotkeyTriggered() { altccents_->popup(); }
-void AltccentsWin::onToggleHotkeyTriggered() { altccents_->toggleProgramState(); }
+void AltccentsWin::onPopupHotkeyTriggered() {
+    if (altccents_->programState()) {
+        altccents_->popup();
+    }
+}
+void AltccentsWin::onToggleHotkeyTriggered() {
+    altccents_->toggleProgramState();
+}
 
 // TODO(clovis): add MODES: one-shot, hook, hotkey
 LRESULT CALLBACK AltccentsWin::hook_proc(int code, WPARAM wparam,
