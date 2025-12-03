@@ -94,7 +94,8 @@ class Settings : public QObject {
         kProgramState,
         kSaveCache,
         kControlKey,
-        kHotkey,
+        kPopupHotkey,
+        kToggleHotkey,
         kOneShotMode,
         // Insert new members here
         kEnumLength
@@ -204,11 +205,17 @@ class Settings : public QObject {
         QVariant old_val{get(s)};
         settings_[s].val = val;
 
+        if (old_val == get(s)) {
+            return;
+        }
+
         switch (s) {
-            case kHotkey: {
-                if (old_val != get(s)) {
-                    emit instance().hotkeyChanged();
-                }
+            case kPopupHotkey: {
+                emit instance().popupHotkeyChanged();
+                break;
+            }
+            case kToggleHotkey: {
+                emit instance().toggleHotkeyChanged();
                 break;
             }
             case kControlKey: {
@@ -264,7 +271,8 @@ class Settings : public QObject {
         return instance;
     }
    signals:
-    void hotkeyChanged();
+    void popupHotkeyChanged();
+    void toggleHotkeyChanged();
     void controlKeyChanged();
 
    private:
@@ -428,14 +436,21 @@ class Settings : public QObject {
           .desc{"Define 'control' key. Example: \"alt\"."},
           .def_val{"alt"},
           .val{}}},
-        // TODO(clovis): add program toggle hotkey
-        {kHotkey,
-         {.key{"App/hotkey"},
+        {kPopupHotkey,
+         {.key{"App/popup_hotkey"},
           .desc{"Define popup window hotkey."
                 "Supported modifiers: any "
                 "ctrl/alt/win/shift(may be combined). Example: "
                 "\"ctrl+alt+tilde\"."},
           .def_val{"ctrl+alt+tilde"},
+          .val{}}},
+        {kToggleHotkey,
+         {.key{"App/toggle_hotkey"},
+          .desc{"Define turn on/off program hotkey."
+                "Supported modifiers: any "
+                "ctrl/alt/win/shift(may be combined). Example: "
+                "\"l_win+alt+tilde\"."},
+          .def_val{"l_win+alt+tilde"},
           .val{}}},
         {kOneShotMode,
          {.key{"App/one_shot_mode"},

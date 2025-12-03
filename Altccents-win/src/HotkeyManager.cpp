@@ -1,7 +1,6 @@
 #include "Altccents/HotkeyManager.h"
 
 #include "Altccents/AccentProfile/AccentProfile.h"
-#include "Altccents/Settings.h"
 
 namespace Altccents {
 HotkeyManager::HotkeyManager() : QObject{nullptr} {
@@ -11,8 +10,12 @@ HotkeyManager::HotkeyManager() : QObject{nullptr} {
 
     startMsgLoop();
 
-    connect(&Settings::instance(), &Settings::hotkeyChanged, this,
-            &HotkeyManager::onSettingsHotkeyChanged, Qt::DirectConnection);
+  // Hotkey signals connect
+    for (const Hotkey& i : kHotkeys) {
+        connect(
+            &Settings::instance(), i.setting_signal, this,
+            [this, i]() { onHotkeyChanged(i.id); }, Qt::DirectConnection);
+    }
 }
 HotkeyManager::~HotkeyManager() {
     stopMsgLoop();
@@ -21,15 +24,25 @@ HotkeyManager::~HotkeyManager() {
     msg_thread_.wait();
 }
 
-void HotkeyManager::onSettingsHotkeyChanged() {
-    postLoopThreadMsg(kUpdateHotkeyMsg);
+void HotkeyManager::onHotkeyChanged(int hotkey_id) {
+    if (kHotkeys.contains(hotkey_id)) {
+        postLoopThreadMsg(kHotkeys[hotkey_id].update_msg);
+    }
 }
 
-void HotkeyManager::setHotkey_msg() {
+void HotkeyManager::setHotkey_msg(int hotkey_id) {
+    if (!kHotkeys.contains(hotkey_id)) {
+        qWarning() << QString{
+            "HotkeyManager [WARNING]: there is no hotkey with id %1 in "
+            "kHotkeys"};
+        return;
+    }
+    const Hotkey& hk{kHotkeys[hotkey_id]};
+
     // NOTE(clovis): fore more info see
     // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey
-    QList<Key> keys{AccentProfile::keysFromString(
-        Settings::get(Settings::kHotkey).toString())};
+    QList<Key> keys{
+        AccentProfile::keysFromString(Settings::get(hk.setting).toString())};
 
     if (keys.isEmpty()) {
         qWarning() << "HotkeyManager [WARNING]: Failed to RegisterHotKey()";
@@ -77,13 +90,22 @@ void HotkeyManager::setHotkey_msg() {
 
     // Do hotkey registration
     // NOTE(clovis): it is possible to register hotkey without modifiers
-    BOOL r = {RegisterHotKey(nullptr, kHotkeyId, modifiers, hotkey_key)};
+    BOOL r = {RegisterHotKey(nullptr, hk.id, modifiers, hotkey_key)};
 
     if (r == 0) {
         qWarning() << "HotkeyManager [WARNING]: Failed to RegisterHotKey()";
     }
 }
-void HotkeyManager::unsetHotkey_msg() { UnregisterHotKey(nullptr, kHotkeyId); }
+void HotkeyManager::unsetHotkey_msg(int hotkey_id) {
+    if (hotkey_id == 0) {
+        for (const Hotkey& i : kHotkeys) {
+            UnregisterHotKey(nullptr, i.id);
+        }
+        return;
+    }
+
+    UnregisterHotKey(nullptr, hotkey_id);
+}
 
 void HotkeyManager::msgLoop_msg() {
     // Get msgLoop thread id
@@ -91,19 +113,29 @@ void HotkeyManager::msgLoop_msg() {
         reinterpret_cast<DWORD_PTR>(msg_thread_.currentThreadId()));
     // Initial hotkey setup
     unsetHotkey_msg();
-    setHotkey_msg();
+    for (const Hotkey& i : kHotkeys) {
+        setHotkey_msg(i.id);
+    }
     //
 
     MSG msg = {};
     while (GetMessage(&msg, nullptr, 0, 0) != 0) {
+        // First check for hotkey update msgs
+        for (const Hotkey& i : kHotkeys) {
+            if (msg.message == i.update_msg) {
+                unsetHotkey_msg(i.id);
+                setHotkey_msg(i.id);
+                continue;
+            }
+        }
+        // Second check for other msgs
         switch (msg.message) {
             case WM_HOTKEY: {
-                emit hotkeyTriggered();
-                break;
-            }
-            case kUpdateHotkeyMsg: {
-                unsetHotkey_msg();
-                setHotkey_msg();
+                int hk_id{static_cast<int>(msg.wParam)};
+                // Emit hotkey signal
+                if (kHotkeys.contains(hk_id)) {
+                    kHotkeys[hk_id].signal(this);
+                }
                 break;
             }
             case kStopMsgLoopMsg: {
@@ -138,4 +170,24 @@ void HotkeyManager::stopMsgLoop() {
 void HotkeyManager::postLoopThreadMsg(UINT msg) {
     PostThreadMessageW(msgLoopThreadId_, msg, 0, 0);
 }
+
+const QHash<int, HotkeyManager::Hotkey> HotkeyManager::kHotkeys{
+    {kPopupHotkeyId, Hotkey{.id = kPopupHotkeyId,
+                            .setting = Settings::kPopupHotkey,
+                            .setting_signal = &Settings::popupHotkeyChanged,
+                            .update_msg = kUpdatePopupHotkeyMsg,
+                            .signal =
+                                [](HotkeyManager* hm) {
+                                    if (hm) emit hm->popupHotkeyTriggered();
+                                }}},
+    {kToggleHotkeyId, Hotkey{.id = kToggleHotkeyId,
+                             .setting = Settings::kToggleHotkey,
+                             .setting_signal = &Settings::toggleHotkeyChanged,
+                             .update_msg = kUpdateToggleHotkeyMsg,
+                             .signal =
+                                 [](HotkeyManager* hm) {
+                                     if (hm) emit hm->toggleHotkeyTriggered();
+                                 }}},
+    // add new hotkeys here
+};
 }  // namespace Altccents

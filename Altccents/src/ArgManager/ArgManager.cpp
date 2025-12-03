@@ -35,7 +35,8 @@ ArgManager::ArgManager() {
                 type_name += "(KEY)";
                 break;
             }
-            case Settings::kHotkey: {
+            case Settings::kToggleHotkey:
+            case Settings::kPopupHotkey: {
                 type_name += "(MODIFIER_KEYS+KEY)";
                 break;
             }

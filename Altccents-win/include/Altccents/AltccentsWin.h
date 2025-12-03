@@ -18,7 +18,8 @@ class AltccentsWin : public QObject {
     void onProgramStateChanged(bool state);
     static void onControlKeyChanged();
     static void onCharSendRequested(Key, QChar symbol);
-    static void onHotkeyTriggered();
+    static void onPopupHotkeyTriggered();
+    static void onToggleHotkeyTriggered();
 
    private:
     // SetWindowsHookEx() accepts only static or global functions
@@ -37,6 +38,5 @@ class AltccentsWin : public QObject {
     inline static Key control_key_{};
     HHOOK hook_{nullptr};
     HotkeyManager* hotkey_manager_;
-
 };
 }  // namespace Altccents
