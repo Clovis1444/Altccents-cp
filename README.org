@@ -1,0 +1,12 @@
+#+title: Altccents README
+#+description: README file for Altccents project
+#+author: Clovis1444
+
+* About
+*Altccents* - simple utility for typing accented characters.
+
+For more info use:
+
+#+BEGIN_SRC bash
+Altccents --help
+#+END_SRC
