@@ -33,6 +33,8 @@ class ArgManager : public QCommandLineParser {
         {{"print-profile-example",
           "Prints example of Accent Profile json file."},
          []() { AccentProfile::printJsonAccentProfileExample(); }},
+        {{"print-setting-entries", "Prints all available setting entries."},
+         []() { Settings::printSettings(); }},
         // Insert new args here
     };
 };

@@ -270,6 +270,38 @@ class Settings : public QObject {
         static Settings instance;
         return instance;
     }
+
+    static void printSettings() {
+        // Get columns width
+        qsizetype k_w{};
+        qsizetype d_w{};
+        qsizetype t_w{};
+        qsizetype dv_w{};
+        for (const auto& i : settings_) {
+            k_w = qMax(i.key.length(), k_w);
+            d_w = qMax(i.desc.length(), d_w);
+            t_w = qMax(QString{i.def_val.typeName()}.length(), t_w);
+            dv_w = qMax(i.def_val.toString().length(), dv_w);
+        }
+
+        // NOTE(clovis): using QTextStream to print to STDOUT
+        QTextStream out{stdout};
+        for (int i{}; static_cast<SettingsType>(i) != kEnumLength; ++i) {
+            auto st{static_cast<SettingsType>(i)};
+            if (!settings_.contains(st)) {
+                continue;
+            }
+
+            SettingEntry e{settings_[st]};
+            QString key{e.key.leftJustified(k_w)};
+            QString desc{e.desc.leftJustified(d_w)};
+            QString type{QString{e.def_val.typeName()}.leftJustified(t_w)};
+            QString def_val{e.def_val.toString().leftJustified(dv_w)};
+            // |key|desc|type|def_val|
+            out << '|' << key << '|' << desc << '|' << type << '|' << def_val
+                << '|' << Qt::endl;
+        }
+    }
    signals:
     void popupHotkeyChanged();
     void toggleHotkeyChanged();
@@ -438,16 +470,14 @@ class Settings : public QObject {
           .val{}}},
         {kPopupHotkey,
          {.key{"App/popup_hotkey"},
-          .desc{"Define popup window hotkey."
-                "Supported modifiers: any "
+          .desc{"Define popup window hotkey. Supported modifiers: any "
                 "ctrl/alt/win/shift(may be combined). Example: "
                 "\"ctrl+alt+tilde\"."},
           .def_val{"ctrl+alt+tilde"},
           .val{}}},
         {kToggleHotkey,
          {.key{"App/toggle_hotkey"},
-          .desc{"Define turn on/off program hotkey."
-                "Supported modifiers: any "
+          .desc{"Define turn on/off program hotkey. Supported modifiers: any "
                 "ctrl/alt/win/shift(may be combined). Example: "
                 "\"l_win+alt+tilde\"."},
           .def_val{"l_win+alt+tilde"},
