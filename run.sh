@@ -4,22 +4,10 @@
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 cd "$SCRIPT_DIR" || exit 1
 
-BUILD_DIR="./build/"
-LINUX_TARGET="Altccents-linux/Altccents-linux"
-WIN_TARGET="Altccents-win.exe"
-TARGET=""
+# Import build_funcs.sh
+source ./build_funcs.sh
 
-if [ "$1" ]; then # Manually set target
-    TARGET=${BUILD_DIR}${1}
-else # Determine target through determining OS
-    case "$(uname -s)" in
-        Linux*)   TARGET=${BUILD_DIR}${LINUX_TARGET} ;;
-        MINGW*|MSYS*|CYGWIN*) TARGET=${BUILD_DIR}${WIN_TARGET} ;;
-        *)       echo "Failed to determine target. You may pass target name as first argument." && exit 1 ;;
-    esac
-fi
-
-echo ${TARGET}
+TARGET=$(get_target "$1")
 
 # Build
 ./build.sh || exit 1

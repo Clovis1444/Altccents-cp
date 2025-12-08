@@ -1,8 +1,7 @@
-#+title: Altccents README
+#+title: Altccents
 #+description: README file for Altccents project
 #+author: Clovis1444
 
-* About
 *Altccents* - simple utility for typing accented characters.
 
 For more info use:
@@ -17,18 +16,8 @@ Altccents --help
 echo '| Name | Description | Type | Default value |'
 echo '|------+-------------+------+---------------|'
 # Determine target name
-TARGET=""
-case "$(uname -s)" in
-    Linux*)
-        TARGET="./build/Altccents-linux/Altccents-linux"
-        ;;
-    MINGW*|MSYS*|CYGWIN*)
-        TARGET="./build/Altccents-win.exe"
-        ;;
-    ,*)
-        exit 1
-        ;;
-esac
+source ./build_funcs.sh
+TARGET=$(get_target)
 # Check if target exists
 if [ -f $TARGET ]; then
     # Just execute

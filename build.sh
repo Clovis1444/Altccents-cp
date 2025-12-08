@@ -4,7 +4,10 @@
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 cd "$SCRIPT_DIR" || exit 1
 
-BUILD_DIR='./build'
+# Import build_funcs.sh
+source ./build_funcs.sh
+
+BUILD_DIR=$(get_build_dir)
 BUILD_GEN="Ninja"
 BILD_TYPE="Debug" # Debug build by default
 
