@@ -10,3 +10,67 @@ For more info use:
 #+BEGIN_SRC bash
 Altccents --help
 #+END_SRC
+
+* Arguments and setting options
+
+#+begin_src sh :results raw :exports results
+echo '| Name | Description | Type | Default value |'
+echo '|------+-------------+------+---------------|'
+# Determine target name
+TARGET=""
+case "$(uname -s)" in
+    Linux*)
+        TARGET="./build/Altccents-linux/Altccents-linux"
+        ;;
+    MINGW*|MSYS*|CYGWIN*)
+        TARGET="./build/Altccents-win.exe"
+        ;;
+    ,*)
+        exit 1
+        ;;
+esac
+# Check if target exists
+if [ -f $TARGET ]; then
+    # Just execute
+    $TARGET --print-setting-entries
+else
+    # Build and then execute
+    ./build.sh > /dev/null
+    $TARGET --print-setting-entries
+fi
+#+end_src
+
+#+RESULTS:
+| Name                               | Description                                                                                                                  | Type    | Default value   |
+|------------------------------------+------------------------------------------------------------------------------------------------------------------------------+---------+-----------------|
+| Popup/popup_x                      | Popup relative x pos [0..1].                                                                                                 | double  | 0.5             |
+| Popup/popup_y                      | Popup relative y pos [0..1].                                                                                                 | double  | 0.9             |
+| Popup/popup_opacity                | Popup opacity [0..1].                                                                                                        | double  | 0.9             |
+| Popup/popup_margins                | Margins between char boxes.                                                                                                  | int     | 10              |
+| Popup/popup_tab_margins            | Margins between tabs.                                                                                                        | int     | 1               |
+| Popup/char_box_size                | Char box size.                                                                                                               | int     | 100             |
+| Popup/popup_tab_size               | Tab size.                                                                                                                    | int     | 50              |
+| Popup/popup_background_color       | Popup background color.                                                                                                      | QColor  | #181825         |
+| Popup/char_box_color               | Char box color.                                                                                                              | QColor  | #313244         |
+| Popup/char_box_active_color        | Selected char box color.                                                                                                     | QColor  | #585b70         |
+| Popup/popup_rounding               | Percentage rounding for popup elements [0..100].                                                                             | double  | 0.35            |
+| Popup/popup_border_width           | Popup border width.                                                                                                          | int     | 3               |
+| Popup/popup_border_color           | Popup border color.                                                                                                          | QColor  | #cba6f7         |
+| Popup/char_box_border_color        | Char box border color.                                                                                                       | QColor  | #89b4fa         |
+| Popup/char_box_border_active_color | Selected char box border color.                                                                                              | QColor  | #b4befe         |
+| Popup/popup_font_color             | Popup font color.                                                                                                            | QColor  | #eba0ac         |
+| Popup/popup_active_font_color      | Popup selected font color.                                                                                                   | QColor  | #a6e3a1         |
+| Popup/popup_font_family            | Popup font family.                                                                                                           | QString | Comic Sans MS   |
+| Popup/popup_font_point_size        | Popup font size.                                                                                                             | int     | 50              |
+| Popup/popup_tab_font_point_size    | Popup tab font size.                                                                                                         | int     | 25              |
+| Popup/popup_font_weight            | Popup font weight.                                                                                                           | int     | -1              |
+| Popup/popup_font_italic            | Use italic font for for popup.                                                                                               | bool    | false           |
+| Cache/active_profile               | Set active profile.                                                                                                          | QString |                 |
+| Cache/program_state                | Set program state.                                                                                                           | bool    | true            |
+| Cache/save_cache                   | Set whether the cache will be saved after closing the program.                                                               | bool    | true            |
+| App/control_key                    | Define 'control' key. Example: "alt".                                                                                        | QString | alt             |
+| App/popup_hotkey                   | Define popup window hotkey. Supported modifiers: any ctrl/alt/win/shift(may be combined). Example: "ctrl+alt+tilde".         | QString | ctrl+alt+tilde  |
+| App/toggle_hotkey                  | Define turn on/off program hotkey. Supported modifiers: any ctrl/alt/win/shift(may be combined). Example: "l_win+alt+tilde". | QString | l_win+alt+tilde |
+| App/one_shot_mode                  | Start program in OneShot mode.                                                                                               | bool    | false           |
+
+* New header
