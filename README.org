@@ -88,7 +88,7 @@ On *Windows* you have 2 options:
 
 #+begin_quote
 [!NOTE]
-Do not create the second instance of the programm by running it using ~Altccents-linux --one_shot_mode=true~ when *Altccents* is already running in other *mode*. Use [[#hotkey-mode][Hotkey mode]] instead.
+Do not create the second instance of the programm by running it using ~Altccents --one_shot_mode=true~ when *Altccents* is already running in other *mode*. Use [[#hotkey-mode][Hotkey mode]] instead.
 #+end_quote
 
 * Accent profiles
@@ -202,7 +202,76 @@ For example, to run *Altccents* with /italic font/, /no popup rounding/ and /Num
 
 List of all available arguments:
 
-TODO
+#+begin_src sh :results output :exports results
+# Determine target name
+source ./build_funcs.sh
+TARGET=$(get_target)
+# Check if target exists
+if [ -f $TARGET ]; then
+    # Just execute
+    $TARGET --help | awk '/^Options:/{flag=1; next} flag'
+else
+    # Build and then execute
+    ./build.sh > /dev/null
+    $TARGET --help | awk '/^Options:/{flag=1; next} flag'
+fi
+#+end_src
+
+#+RESULTS:
+#+begin_example
+  -?, -h, --help                                Displays help on commandline
+                                                options.
+  --help-all                                    Displays help, including
+                                                generic Qt options.
+  -v, --version                                 Displays version information.
+  --print-setting-entries                       Prints all available setting
+                                                entries.
+  --print-keys                                  Prints list of all key names
+                                                supported by the application.
+  --print-profile-example                       Prints example of Accent
+                                                Profile json file.
+  --print-paths                                 Prints some program related
+                                                paths.
+  --print-settings                              Prints content of settings.ini
+                                                file.
+  --popup_x <double>                            Popup relative x pos [0..1].
+  --popup_y <double>                            Popup relative y pos [0..1].
+  --popup_opacity <double>                      Popup opacity [0..1].
+  --popup_margins <int>                         Margins between char boxes.
+  --popup_tab_margins <int>                     Margins between tabs.
+  --char_box_size <int>                         Char box size.
+  --popup_tab_size <int>                        Tab size.
+  --popup_background_color <QColor>             Popup background color.
+  --char_box_color <QColor>                     Char box color.
+  --char_box_active_color <QColor>              Selected char box color.
+  --popup_rounding <double>                     Percentage rounding for popup
+                                                elements [0..100].
+  --popup_border_width <int>                    Popup border width.
+  --popup_border_color <QColor>                 Popup border color.
+  --char_box_border_color <QColor>              Char box border color.
+  --char_box_border_active_color <QColor>       Selected char box border color.
+  --popup_font_color <QColor>                   Popup font color.
+  --popup_active_font_color <QColor>            Popup selected font color.
+  --popup_font_family <QString>                 Popup font family.
+  --popup_font_point_size <int>                 Popup font size.
+  --popup_tab_font_point_size <int>             Popup tab font size.
+  --popup_font_weight <int>                     Popup font weight.
+  --popup_font_italic <bool>                    Use italic font for for popup.
+  --control_key <QString(KEY)>                  Define 'control' key. Example:
+                                                "alt".
+  --popup_hotkey <QString(MODIFIER_KEYS+KEY)>   Define popup window hotkey.
+                                                Supported modifiers: any
+                                                ctrl/alt/win/shift(may be
+                                                combined). Example:
+                                                "ctrl+alt+tilde".
+  --toggle_hotkey <QString(MODIFIER_KEYS+KEY)>  Define turn on/off program
+                                                hotkey. Supported modifiers: any
+                                                ctrl/alt/win/shift(may be
+                                                combined). Example:
+                                                "l_win+alt+tilde".
+  --one_shot_mode <bool>                        Start program in OneShot mode.
+#+end_example
+
 
 * Installation
 TODO
