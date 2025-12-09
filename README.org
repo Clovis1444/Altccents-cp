@@ -2,15 +2,133 @@
 #+description: README file for Altccents project
 #+author: Clovis1444
 
-*Altccents* - simple utility for typing accented characters.
+*Altccents* - highly customizable utility for typing accented characters written in /C++/.
 
-For more info use:
+* Features
+- Highly customizable
+- Lightweight and fast
+- Cross-platform (works both on Windows and Linux)
+- 3 Working modes
+- Configuration through setting file or CL arguments
+- Create your custom accent profiles in json format
+- Designed for keyboard oriented users
 
-#+BEGIN_SRC bash
-Altccents --help
-#+END_SRC
+* Table of contents :toc:
+- [[#features][Features]]
+- [[#usage][Usage]]
+  - [[#popup-controls][Popup controls]]
+  - [[#modes][Modes]]
+  - [[#linux][Linux]]
+  - [[#windows][Windows]]
+- [[#accent-profiles][Accent profiles]]
+- [[#configuration][Configuration]]
+  - [[#settings][Settings]]
+  - [[#command-line-arguments][Command Line arguments]]
+- [[#installation][Installation]]
+- [[#development][Development]]
+- [[#license][License]]
 
-* Arguments and setting options
+* Usage
+** Popup controls
+- Next accent - ~right arrow key~ or ~l~
+- Previous accent - ~left arrow key~ or ~h~
+- Next character - ~up arrow key~ or ~k~
+- Previous character - ~down arrow key~ or ~j~
+- Switch to capital case - hold ~shift~
+- Type selected accent - ~enter~
+- Copy selected accent to clipboard - ~ctrlc~ + ~c~
+- Close popup - ~esc~
+
+** Modes
+*Altccents* supports 3 working modes:
+*** OneShot mode
+Popup windows shows immediately after the program startup. After popup window closes - program terminates.
+
+#+begin_quote
+[!TIP]
+For more info see the following [[#settings][setting options]]:
+ - ~App/one_shot_mode~
+#+end_quote
+*** Hook mode
+After the program startup, keyboard hook is established. When you press ~control key~ + /accent key/ - popup window shows.
+
+#+begin_quote
+[!TIP]
+For more info see the following [[#settings][setting options]]:
+ - ~App/control_key~
+ - ~App/toggle_hotkey~
+#+end_quote
+#+begin_quote
+[!NOTE]
+This mode only works on windows.
+#+end_quote
+*** Hotkey mode
+After you trigger ~popup hotkey~ - popup window shows.
+
+#+begin_quote
+[!TIP]
+For more info see the following [[#settings][setting options]]:
+ - ~App/popup_hotkey~
+ - ~App/toggle_hotkey~
+#+end_quote
+#+begin_quote
+[!NOTE]
+This mode only works on windows.
+#+end_quote
+
+** Linux
+Due to [[https://en.wikipedia.org/wiki/X_Window_System][X11]] limitations *Altccents* on *Linux* works only in [[#oneshot-mode][OneShot mode]].
+
+It is supposed that you should manualy create a hotkey in your [[https://en.wikipedia.org/wiki/Desktop_environment][DE]] that will execute the program.
+
+** Windows
+On *Windows* you have 2 options:
+1. Start *Altccents* through shortcut in [[#oneshot-mode][OneShot mode]].
+2. Start *Altccents* in [[#hook-mode][Hook mode]] /AND/OR/ [[#hotkey-mode][Hotkey mode]].
+
+#+begin_quote
+[!NOTE]
+Do not create the second instance of the programm by running it using ~Altccents-linux --one_shot_mode=true~ when *Altccents* is already running in other *mode*. Use [[#hotkey-mode][Hotkey mode]] instead.
+#+end_quote
+
+* Accent profiles
+All *accent profiles* files should have ~.json~ extension and be located inside ~profiles directory~.
+
+- ~Profiles directory~ on *Linux* - ~~/.config/Altccents/profiles/~.
+- ~Profiles directory~ on *Windows* - ~%USERPROFILE%/Documents/Altccents/profiles/~.
+
+#+begin_quote
+[!TIP]
+For more info run:
+- ~Altccents --print-paths~.
+- ~Altccents --print-profile-example~.
+- ~Altccents --print-keys~.
+#+end_quote
+
+*Accent profile* structure:
+
+[[file:./images/AccentProfileScheme.png]]
+
+You can also look at default profiles in ~profiles directory~.
+
+* Configuration
+*Altccents* can be configured either through [[#settings][Settings]] or [[#command-line-arguments][Command line arguments]].
+
+** Settings
+All settings can be set in ~config file~.
+
+- ~Config file~ location on *Linux* - ~~/.config/Altccents/settings.ini~.
+- ~Config file~ location on *Windows* - ~%USERPROFILE%/Documents/Altccents/settings.ini~.
+
+#+begin_quote
+[!TIP]
+For more info run:
+- ~Altccents --print-paths~.
+- ~Altccents --print-settings~.
+- ~Altccents --print-setting-entries~.
+#+end_quote
+
+All availabble settings:
 
 #+begin_src sh :results raw :exports results
 echo '| Name | Description | Type | Default value |'
@@ -62,4 +180,35 @@ fi
 | App/toggle_hotkey                  | Define turn on/off program hotkey. Supported modifiers: any ctrl/alt/win/shift(may be combined). Example: "l_win+alt+tilde". | QString | l_win+alt+tilde |
 | App/one_shot_mode                  | Start program in OneShot mode.                                                                                               | bool    | false           |
 
-* New header
+~Config file~ example:
+#+BEGIN_SRC ini
+[App]
+control_key=alt
+
+[Popup]
+popup_opacity=0.7
+popup_rounding=0.25
+popup_font_family=Ubuntu
+popup_font_color=#4493f8
+
+[Cache]
+program_state=true
+#+END_SRC
+
+** Command Line arguments
+You can pass settings through ~arguments~.
+
+For example, to run *Altccents* with /italic font/, /no popup rounding/ and /Num Lock as control key/ use ~Altccents --popup_font_italic=true --popup_rounding=0 --control_key="num_lock"~.
+
+List of all available arguments:
+
+TODO
+
+* Installation
+TODO
+
+* Development
+TODO
+
+* License
+Distributed under ~GNU GENERAL PUBLIC LICENSE~. For more info see [[file:./LICENSE][LICENSE]].
