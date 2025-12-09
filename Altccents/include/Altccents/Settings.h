@@ -272,11 +272,15 @@ class Settings : public QObject {
     }
 
     static void printSettings() {
+        QString k_t{"Name"};
+        QString d_t{"Description"};
+        QString t_t{"Type"};
+        QString dv_t{"Default value"};
         // Get columns width
-        qsizetype k_w{};
-        qsizetype d_w{};
-        qsizetype t_w{};
-        qsizetype dv_w{};
+        qsizetype k_w{k_t.length()};
+        qsizetype d_w{d_t.length()};
+        qsizetype t_w{t_t.length()};
+        qsizetype dv_w{dv_t.length()};
         for (const auto& i : settings_) {
             k_w = qMax(i.key.length(), k_w);
             d_w = qMax(i.desc.length(), d_w);
@@ -286,6 +290,16 @@ class Settings : public QObject {
 
         // NOTE(clovis): using QTextStream to print to STDOUT
         QTextStream out{stdout};
+        // Print title
+        out << '|' << k_t.leftJustified(k_w) << '|' << d_t.leftJustified(d_w)
+            << '|' << t_t.leftJustified(t_w) << '|' << dv_t.leftJustified(dv_w)
+            << '|' << Qt::endl;
+        // Print Separator
+        out << '|' << QString{}.leftJustified(k_w, '-') << '+'
+            << QString{}.leftJustified(d_w, '-') << '+'
+            << QString{}.leftJustified(t_w, '-') << '+'
+            << QString{}.leftJustified(dv_w, '-') << '|' << Qt::endl;
+        // Print settings
         for (int i{}; static_cast<SettingsType>(i) != kEnumLength; ++i) {
             auto st{static_cast<SettingsType>(i)};
             if (!settings_.contains(st)) {

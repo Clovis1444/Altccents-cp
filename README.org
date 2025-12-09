@@ -131,8 +131,6 @@ For more info run:
 All availabble settings:
 
 #+begin_src sh :results raw :exports results
-echo '| Name | Description | Type | Default value |'
-echo '|------+-------------+------+---------------|'
 # Determine target name
 source ./build_funcs.sh
 TARGET=$(get_target)
