@@ -26,6 +26,8 @@
   - [[#command-line-arguments][Command Line arguments]]
 - [[#installation][Installation]]
 - [[#development][Development]]
+  - [[#dependencies][Dependencies]]
+  - [[#build][Build]]
 - [[#license][License]]
 
 * Usage
@@ -275,7 +277,50 @@ fi
 TODO
 
 * Development
-TODO
+** Dependencies
+Main dependencies:
+- ~Qt 6.8.10~
+- ~Clang~ compiler with c++ 23 support
+- ~CMake 3.5.0+~ for building project
+- ~Ninja~ build tool
+- ~7z~ for project deployment
+- ~windeployqt~ for *Windows* deployment
+- [[https://github.com/probonopd/linuxdeployqt][linuxdeployqt]] for *Linux* deployment
+- ~winget~ on *Linux* for post build script
+
+Other dependencies:
+- ~Bash~ shell to run build scripts
+- ~PowerShell~ shell on *Windows*
+- [[https://www.gnu.org/software/coreutils/][GNU Coreutils]] and some other popular cli tools
+- ~ClangFormat~ code formatter
+- ~Clangd~ language server
+- [[https://orgmode.org/][Org mode]] support for README
+
+#+begin_quote
+[!TIP]
+For installing ~GNU Coreutils~ and /other dependencies/ on *Windows* you can use [[https://www.msys2.org/][MSYS2]].
+
+For [[https://orgmode.org/][Org mode]] support you can use [[https://www.gnu.org/software/emacs/][Emacs]].
+#+end_quote
+
+** Build
+To build project in *debug build* use:
+#+begin_src sh
+./build.sh debug
+#+end_src
+
+To build project in *release build* use:
+#+begin_src sh
+./build.sh release
+#+end_src
+
+#+begin_quote
+[!TIP]
+To build project in *debug build* and *run it* use:
+#+begin_src sh
+./run.sh
+#+end_src
+#+end_quote
 
 * License
 Distributed under ~GNU GENERAL PUBLIC LICENSE~. For more info see [[file:./LICENSE][LICENSE]].
