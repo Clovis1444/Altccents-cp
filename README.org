@@ -83,6 +83,11 @@ Due to [[https://en.wikipedia.org/wiki/X_Window_System][X11]] limitations *Altcc
 
 It is supposed that you should manualy create a hotkey in your [[https://en.wikipedia.org/wiki/Desktop_environment][DE]] that will execute the program.
 
+#+begin_quote
+[!IMPORTANT]
+*Altccents* uses [[https://github.com/jordansissel/xdotool][xdotool]] as backend on *Linux*. So you have to install it. For more info [[https://github.com/jordansissel/xdotool?tab=readme-ov-file#installation][see]].
+#+end_quote
+
 ** Windows
 On *Windows* you have 2 options:
 1. Start *Altccents* through shortcut in [[#oneshot-mode][OneShot mode]].
@@ -275,6 +280,11 @@ fi
 
 * Installation
 TODO
+
+#+begin_quote
+[!IMPORTANT]
+*Altccents* uses [[https://github.com/jordansissel/xdotool][xdotool]] as backend on *Linux*. So you have to install it. For more info [[https://github.com/jordansissel/xdotool?tab=readme-ov-file#installation][see]].
+#+end_quote
 
 * Development
 ** Dependencies
