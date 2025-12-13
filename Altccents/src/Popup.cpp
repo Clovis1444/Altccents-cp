@@ -78,6 +78,11 @@ void Popup::show(const QList<QChar>& chars, unsigned int active_char,
     QWidget::show();
 }
 
+void Popup::hideWithoutSignal() {
+    isHiddenWithoutSignal_ = true;
+    QWidget::hide();
+}
+
 // TODO(clovis): implement case where tabs width > chars width
 void Popup::paintEvent(QPaintEvent*) {
     QPainter p{this};
@@ -281,7 +286,12 @@ void Popup::keyReleaseEvent(QKeyEvent* e) {
 }
 
 void Popup::hideEvent(QHideEvent* e) {
-    emit hidden();
+    if (!isHiddenWithoutSignal_) {
+        emit hidden();
+    }
+
+    isHiddenWithoutSignal_ = false;
+
     QWidget::hideEvent(e);
 }
 }  // namespace Altccents

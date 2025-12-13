@@ -602,7 +602,7 @@ void AltccentsApp::onPopupAccentChosen() {
         return;
     }
 
-    popup_->hide();
+    popup_->hideWithoutSignal();
     emit charSendRequested(key, accent_to_send);
 }
 void AltccentsApp::onPopupAccentCopyChosen() {

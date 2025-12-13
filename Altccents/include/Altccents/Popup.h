@@ -15,6 +15,9 @@ class Popup : public QWidget {
     void show(const QList<QChar>& chars, unsigned int active_char,
               const QList<QChar>& tabs, unsigned int active_tab);
 
+    // Hides popup without emitting "Hidden" signal
+    void hideWithoutSignal();
+
    signals:
     void hidden();
     // Note: Popup::hide() should be explicitly called after this signal was
@@ -44,5 +47,7 @@ class Popup : public QWidget {
 
     CharCollection charCollection_;
     TabCollection tabCollection_;
+
+    bool isHiddenWithoutSignal_{};
 };
 }  // namespace Altccents

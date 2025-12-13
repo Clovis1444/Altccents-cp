@@ -2,7 +2,10 @@
 
 #include <qtenvironmentvariables.h>
 
+#include <QDesktopServices>
+#include <QMessageBox>
 #include <QProcess>
+#include <QPushButton>
 
 namespace Altccents {
 AltccentsLinux::AltccentsLinux(AltccentsApp* parent) : QObject{parent} {
@@ -37,6 +40,10 @@ void AltccentsLinux::onCharSendRequested(Key, QChar symbol) {
             qCritical().noquote()
                 << __PRETTY_FUNCTION__ << "[ERROR]: " << p_name
                 << "is not installed on your system";
+
+            showDependencyDialog("xdotool",
+                                 "https://github.com/jordansissel/"
+                                 "xdotool?tab=readme-ov-file#installation");
 
             QApplication::exit(1);
             return;
@@ -82,5 +89,31 @@ QString AltccentsLinux::getXdotoolKeyArg(QChar symbol) {
     arg = arg.arg(symbol.unicode(), 4, 16, QChar{'0'}).toUpper();
 
     return arg;
+}
+
+void AltccentsLinux::showDependencyDialog(const QString& p_name,
+                                          const QString& install_link) {
+    QMessageBox msg_box{};
+    msg_box.setIcon(QMessageBox::Warning);
+    msg_box.setWindowTitle(
+        QString{"%1: Missing Dependency"}.arg(Settings::kProgramName));
+    msg_box.setText(QString{"%1 is not installed."}.arg(p_name));
+    msg_box.setInformativeText(
+        QString{"%1 requires %2 to be installed and accessible via PATH."}
+            .arg(Settings::kProgramName)
+            .arg(p_name));
+
+    msg_box.setStandardButtons(QMessageBox::Close);
+    QPushButton* install_button{
+        msg_box.addButton("See installation page", QMessageBox::YesRole)};
+    install_button->setToolTip(QString{"Visit %1"}.arg(install_link));
+
+    msg_box.setDefaultButton(install_button);
+
+    msg_box.exec();
+
+    if (msg_box.clickedButton() == install_button) {
+        QDesktopServices::openUrl(install_link);
+    }
 }
 }  // namespace Altccents

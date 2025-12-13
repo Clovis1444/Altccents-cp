@@ -18,5 +18,7 @@ class AltccentsLinux : public QObject {
    private:
     static bool isProgramInstalled(const QString& p_name);
     static QString getXdotoolKeyArg(QChar symbol);
+    static void showDependencyDialog(const QString& p_name,
+                                     const QString& install_link);
 };
 }  // namespace Altccents
