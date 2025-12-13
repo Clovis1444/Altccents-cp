@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 # This script builds the project
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"

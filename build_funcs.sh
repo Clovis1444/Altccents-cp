@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 # This script contains helper build function
 
 # This function returns build target depending on the OS

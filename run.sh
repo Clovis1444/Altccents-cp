@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 # This script builds the project in debug build and runs it
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
